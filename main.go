@@ -12,8 +12,8 @@ import (
 
 const Schema = `
 type Query {
-				hello: String!
-				spell(ID: ID!): Spell
+	hello: String!
+	spell(ID: ID!): Spell
 }
 
 type Spell {
@@ -35,7 +35,12 @@ type SpellResolver struct {
 	s *Spell
 }
 
-var spells map[graphql.ID]Spell
+var spells = []*Spell{
+	{ID: "1", Name: "Fireball"},
+	{ID: "2", Name: "Aid"},
+}
+
+var spellData = make(map[graphql.ID]*Spell)
 
 func (r *SpellResolver) ID() graphql.ID {
 	return r.s.ID
@@ -46,17 +51,16 @@ func (r *SpellResolver) Name() string {
 }
 
 func (_ *query) Spell(ctx context.Context, args struct{ ID graphql.ID }) *SpellResolver {
-	s, ok := spells[args.ID]
+	s, ok := spellData[args.ID]
 	if ok {
-		return &SpellResolver{s: &s}
+		return &SpellResolver{s}
 	}
 	return nil
 }
 
 func init() {
-	spells = map[graphql.ID]Spell{
-		"1": Spell{ID: "1", Name: "Fireball"},
-		"2": Spell{ID: "2", Name: "Aid"},
+	for _, s := range spells {
+		spellData[s.ID] = s
 	}
 }
 
