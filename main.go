@@ -14,6 +14,7 @@ const Schema = `
 type Query {
 	hello: String!
 	spell(ID: ID!): Spell
+	spells: [Spell!]
 }
 
 type Spell {
@@ -56,6 +57,16 @@ func (_ *query) Spell(ctx context.Context, args struct{ ID graphql.ID }) *SpellR
 		return &SpellResolver{s}
 	}
 	return nil
+}
+
+func (_ *query) Spells() *[]*SpellResolver {
+	// forgive me father, I know not what else to do
+	var xSpellResolver []*SpellResolver
+	for key, _ := range spellData {
+		xSpellResolver = append(xSpellResolver, &SpellResolver{s: spellData[key]})
+	}
+
+	return &xSpellResolver
 }
 
 func init() {
