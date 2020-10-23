@@ -3,17 +3,15 @@ package main
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/friendsofgo/graphiql"
 	graphql "github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
-	"github.com/joho/godotenv"
+	"github.com/jimmydalecleveland/go-graphql-server/pgconnect"
 	_ "github.com/lib/pq"
 )
 
@@ -67,42 +65,7 @@ func (_ *query) Spells() *[]*SpellResolver {
 	return &xSpellResolver
 }
 
-func db() {
-	envErr := godotenv.Load(".env")
-	if envErr != nil {
-		log.Fatalf("Error loading database .env file")
-	}
-	var (
-		host     = os.Getenv("PGHOST")
-		port, _  = strconv.Atoi(os.Getenv("PGPORT"))
-		user     = os.Getenv("PGUSER")
-		dbname   = os.Getenv("PGDATABASE")
-		password = os.Getenv("PGPASSWORD")
-	)
-
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s", host, port, user, password, dbname)
-	db, err := sql.Open("postgres", psqlInfo)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-
-	err = db.Ping()
-	if err != nil {
-		panic(err)
-	}
-
-	log.Println("Connected to db")
-
-	// sqlStatement := `
-	// SELECT * FROM "Spell"
-	// `
-	// var dbSpells []Spell
-	// rows, rerr := db.Query(sqlStatement)
-	// if rerr != nil {
-	// 	panic(err)
-	// }
-
+func querySpells(db *sql.DB) {
 	spellQuery := `
 		Select "ID", name FROM "Spell"
 	`
@@ -110,7 +73,6 @@ func db() {
 	if rerr != nil {
 		panic(rerr)
 	}
-	defer rows.Close()
 	for rows.Next() {
 		var singleSpell Spell
 		err := rows.Scan(&singleSpell.ID, &singleSpell.Name)
@@ -122,7 +84,10 @@ func db() {
 }
 
 func init() {
-	db()
+	db := pgconnect.InitializeDB()
+	querySpells(db)
+	defer db.Close()
+
 	for _, s := range spells {
 		spellData[s.ID] = s
 	}
