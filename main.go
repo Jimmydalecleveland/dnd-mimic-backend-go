@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -9,19 +10,6 @@ import (
 	graphql "github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
 )
-
-const Schema = `
-type Query {
-	hello: String!
-	spell(ID: ID!): Spell
-	spells: [Spell!]
-}
-
-type Spell {
-	ID: ID!
-	name: String!
-}
-`
 
 type query struct{}
 
@@ -76,14 +64,23 @@ func init() {
 }
 
 func main() {
-	schema := graphql.MustParseSchema(Schema, &query{})
+	// Read .graphql file for schema
+	schemaToString, err := ioutil.ReadFile("schema/schema.graphql")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Setup GraphQL with schema cast to string
+	schema := graphql.MustParseSchema(string(schemaToString), &query{})
+	http.Handle("/query", &relay.Handler{Schema: schema})
+
+	// Setup graphiql
 	graphiqlHandler, err := graphiql.NewGraphiqlHandler("/query")
 	if err != nil {
 		panic(err)
 	}
-
 	http.Handle("/graphiql", graphiqlHandler)
-	http.Handle("/query", &relay.Handler{Schema: schema})
+
 	log.Println("Server up at 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

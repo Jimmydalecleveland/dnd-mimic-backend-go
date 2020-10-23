@@ -1,0 +1,10 @@
+type Query {
+	hello: String!
+	spell(ID: ID!): Spell
+	spells: [Spell!]
+}
+
+type Spell {
+	ID: ID!
+	name: String!
+}
