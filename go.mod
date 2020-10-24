@@ -1,4 +1,4 @@
-module github.com/jimmydalecleveland/go-graphql-server
+module github.com/Jimmydalecleveland/dnd-mimic-backend-go
 
 go 1.15
 

@@ -8,8 +8,8 @@ import (
 	"github.com/friendsofgo/graphiql"
 	graphql "github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
-	"github.com/jimmydalecleveland/go-graphql-server/datasources"
-	"github.com/jimmydalecleveland/go-graphql-server/pgconnect"
+	"github.com/Jimmydalecleveland/dnd-mimic-backend-go/datasources"
+	"github.com/Jimmydalecleveland/dnd-mimic-backend-go/pgconnect"
 )
 
 func main() {
@@ -23,7 +23,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Setup GraphQL with schema cast to string
+	// Setup GraphQL with schema cast to string and db instance
 	schema := graphql.MustParseSchema(string(schemaToString), &datasources.Resolver{DB: db})
 	http.Handle("/query", &relay.Handler{Schema: schema})
 
