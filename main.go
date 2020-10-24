@@ -17,8 +17,6 @@ func main() {
 	db := pgconnect.InitializeDB()
 	defer db.Close()
 
-	datasources.QuerySpells(db)
-
 	// Read .graphql file for schema
 	schemaToString, err := ioutil.ReadFile("schema/schema.graphql")
 	if err != nil {
@@ -26,7 +24,7 @@ func main() {
 	}
 
 	// Setup GraphQL with schema cast to string
-	schema := graphql.MustParseSchema(string(schemaToString), &datasources.Query{})
+	schema := graphql.MustParseSchema(string(schemaToString), &datasources.Resolver{DB: db})
 	http.Handle("/query", &relay.Handler{Schema: schema})
 
 	// Setup graphiql

@@ -1,12 +1,15 @@
 package datasources
 
 import (
+	"database/sql"
 	"strconv"
 
 	graphql "github.com/graph-gophers/graphql-go"
 )
 
-type Query struct{}
+type Resolver struct {
+	DB *sql.DB
+}
 
 // This is nutty, but converting from an int32 to a string requires it to first
 // be converted to an int. This library expects a graphql.ID, which a string can
