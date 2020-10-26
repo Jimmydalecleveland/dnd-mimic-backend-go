@@ -8,8 +8,8 @@ import (
 	"github.com/friendsofgo/graphiql"
 	graphql "github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
-	"github.com/Jimmydalecleveland/dnd-mimic-backend-go/datasources"
-	"github.com/Jimmydalecleveland/dnd-mimic-backend-go/pgconnect"
+	"github.com/jimmydalecleveland/dnd-mimic-backend-go/datasources"
+	"github.com/jimmydalecleveland/dnd-mimic-backend-go/pgconnect"
 )
 
 func main() {

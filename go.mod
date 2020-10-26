@@ -1,4 +1,4 @@
-module github.com/Jimmydalecleveland/dnd-mimic-backend-go
+module github.com/jimmydalecleveland/dnd-mimic-backend-go
 
 go 1.15
 
