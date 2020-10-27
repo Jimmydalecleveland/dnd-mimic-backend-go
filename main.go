@@ -14,11 +14,14 @@ import (
 
 func main() {
 	// Open db connection
-	db := pgconnect.InitializeDB()
+	db, err := pgconnect.InitializeDB()
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer db.Close()
 
 	// Read .graphql file for schema
-	schemaToString, err := ioutil.ReadFile("schema/schema.graphql")
+	schemaToString, err := ioutil.ReadFile("./schema/schema.graphql")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -30,7 +33,7 @@ func main() {
 	// Setup graphiql
 	graphiqlHandler, err := graphiql.NewGraphiqlHandler("/query")
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	http.Handle("/graphiql", graphiqlHandler)
 

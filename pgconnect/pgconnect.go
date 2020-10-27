@@ -2,6 +2,7 @@ package pgconnect
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -13,10 +14,10 @@ import (
 )
 
 // InitializeDB starts a database connection with an initial ping and returns that instance.
-func InitializeDB() *sql.DB {
+func InitializeDB() (*sql.DB, error) {
 	envErr := godotenv.Load(".env")
 	if envErr != nil {
-		log.Fatalf("Error loading database .env file")
+		return nil, errors.New("error loading database .env file")
 	}
 	var (
 		host     = os.Getenv("PGHOST")
@@ -29,14 +30,14 @@ func InitializeDB() *sql.DB {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s", host, port, user, password, dbname)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	err = db.Ping()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	log.Println("Connected to db")
-	return db
+	return db, nil
 }
