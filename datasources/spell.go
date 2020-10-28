@@ -8,13 +8,13 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type Spell struct {
+type spell struct {
 	ID   int32
-	Name string
+	name string
 }
 
 type SpellResolver struct {
-	s *Spell
+	s *spell
 }
 
 func (r *SpellResolver) ID() graphql.ID {
@@ -22,7 +22,7 @@ func (r *SpellResolver) ID() graphql.ID {
 }
 
 func (r *SpellResolver) Name() string {
-	return r.s.Name
+	return r.s.name
 }
 
 func (r *Resolver) Spell(ctx context.Context, args struct{ ID int32 }) *SpellResolver {
@@ -30,8 +30,8 @@ func (r *Resolver) Spell(ctx context.Context, args struct{ ID int32 }) *SpellRes
 		Select "ID", name FROM "Spell"
 		WHERE "ID" = $1
 	`
-	var spell Spell
-	err := r.DB.QueryRow(spellQuery, args.ID).Scan(&spell.ID, &spell.Name)
+	var spell spell
+	err := r.DB.QueryRow(spellQuery, args.ID).Scan(&spell.ID, &spell.name)
 	if err != nil {
 		return nil
 	}
@@ -39,7 +39,7 @@ func (r *Resolver) Spell(ctx context.Context, args struct{ ID int32 }) *SpellRes
 }
 
 func (r *Resolver) Spells() *[]*SpellResolver {
-	var spells []*Spell
+	var spells []*spell
 	var err error
 	spellQuery := `
 		Select "ID", name FROM "Spell"
@@ -49,8 +49,8 @@ func (r *Resolver) Spells() *[]*SpellResolver {
 		log.Fatal(err)
 	}
 	for rows.Next() {
-		var singleSpell Spell
-		err = rows.Scan(&singleSpell.ID, &singleSpell.Name)
+		var singleSpell spell
+		err = rows.Scan(&singleSpell.ID, &singleSpell.name)
 		if err != nil {
 			log.Fatal(err)
 		}

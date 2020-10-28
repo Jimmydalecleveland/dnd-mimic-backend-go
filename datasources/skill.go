@@ -6,14 +6,14 @@ import (
 	graphql "github.com/graph-gophers/graphql-go"
 )
 
-type Skill struct {
+type skill struct {
 	ID      int32
-	Name    string
-	Ability string
+	name    string
+	ability string
 }
 
 type SkillResolver struct {
-	s *Skill
+	s *skill
 }
 
 func (r *SkillResolver) ID() graphql.ID {
@@ -21,15 +21,15 @@ func (r *SkillResolver) ID() graphql.ID {
 }
 
 func (r *SkillResolver) Name() string {
-	return r.s.Name
+	return r.s.name
 }
 
 func (r *SkillResolver) Ability() string {
-	return r.s.Ability
+	return r.s.ability
 }
 
 func (r *Resolver) Skills() *[]*SkillResolver {
-	var skills []*Skill
+	var skills []*skill
 	var err error
 	skillQuery := `
 		Select "ID", name, ability FROM "Skill"
@@ -40,8 +40,8 @@ func (r *Resolver) Skills() *[]*SkillResolver {
 		log.Fatal(err)
 	}
 	for rows.Next() {
-		var singleSkill Skill
-		err = rows.Scan(&singleSkill.ID, &singleSkill.Name, &singleSkill.Ability)
+		var singleSkill skill
+		err = rows.Scan(&singleSkill.ID, &singleSkill.name, &singleSkill.ability)
 		if err != nil {
 			log.Fatal(err)
 		}
