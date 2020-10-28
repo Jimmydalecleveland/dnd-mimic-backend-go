@@ -1,9 +1,16 @@
 type Query {
 	spell(ID: ID!): Spell
 	spells: [Spell!]
+	skills: [Skill!]
 }
 
 type Spell {
 	ID: ID!
 	name: String!
+}
+
+type Skill {
+	ID: ID!
+	name: String!
+	ability: String!
 }

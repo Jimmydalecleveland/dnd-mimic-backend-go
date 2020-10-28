@@ -46,7 +46,7 @@ func (r *Resolver) Spells() *[]*SpellResolver {
 	`
 	rows, err := r.DB.Query(spellQuery)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	for rows.Next() {
 		var singleSpell Spell
