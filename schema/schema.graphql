@@ -7,6 +7,13 @@ type Query {
 type Spell {
 	ID: ID!
 	name: String!
+	level: Int
+	school: String
+	castingTime: String
+	range: String
+	components: String
+	duration: String
+	description: String
 }
 
 type Skill {

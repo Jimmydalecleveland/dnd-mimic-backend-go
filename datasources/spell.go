@@ -9,8 +9,15 @@ import (
 )
 
 type Spell struct {
-	ID   int32 `gorm:"column:ID"`
-	Name string
+	ID          int32 `gorm:"column:ID"`
+	Name        string
+	Level       int32
+	School      string
+	CastingTime string `gorm:"column:castingTime"`
+	Range       string
+	Components  string
+	Duration    string
+	Description string
 }
 
 func (Spell) TableName() string {
@@ -27,6 +34,34 @@ func (r *SpellResolver) ID() graphql.ID {
 
 func (r *SpellResolver) Name() string {
 	return r.s.Name
+}
+
+func (r *SpellResolver) Level() *int32 {
+	return &r.s.Level
+}
+
+func (r *SpellResolver) School() *string {
+	return &r.s.School
+}
+
+func (r *SpellResolver) CastingTime() *string {
+	return &r.s.CastingTime
+}
+
+func (r *SpellResolver) Range() *string {
+	return &r.s.Range
+}
+
+func (r *SpellResolver) Components() *string {
+	return &r.s.Components
+}
+
+func (r *SpellResolver) Duration() *string {
+	return &r.s.Duration
+}
+
+func (r *SpellResolver) Description() *string {
+	return &r.s.Description
 }
 
 func (r *Resolver) Spell(ctx context.Context, args struct{ ID int32 }) *SpellResolver {
