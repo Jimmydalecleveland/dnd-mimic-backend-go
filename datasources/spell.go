@@ -8,13 +8,17 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type spell struct {
-	ID   int32
-	name string
+type Spell struct {
+	ID   int32 `gorm:"column:ID"`
+	Name string
+}
+
+func (Spell) TableName() string {
+	return "Spell"
 }
 
 type SpellResolver struct {
-	s *spell
+	s *Spell
 }
 
 func (r *SpellResolver) ID() graphql.ID {
@@ -22,39 +26,24 @@ func (r *SpellResolver) ID() graphql.ID {
 }
 
 func (r *SpellResolver) Name() string {
-	return r.s.name
+	return r.s.Name
 }
 
 func (r *Resolver) Spell(ctx context.Context, args struct{ ID int32 }) *SpellResolver {
-	spellQuery := `
-		Select "ID", name FROM "Spell"
-		WHERE "ID" = $1
-	`
-	var spell spell
-	err := r.DB.QueryRow(spellQuery, args.ID).Scan(&spell.ID, &spell.name)
-	if err != nil {
+	var spell Spell
+	result := r.DB.First(&spell, args.ID)
+	if result.Error != nil {
 		return nil
 	}
 	return &SpellResolver{s: &spell}
 }
 
 func (r *Resolver) Spells() *[]*SpellResolver {
-	var spells []*spell
-	var err error
-	spellQuery := `
-		Select "ID", name FROM "Spell"
-	`
-	rows, err := r.DB.Query(spellQuery)
-	if err != nil {
-		log.Fatal(err)
-	}
-	for rows.Next() {
-		var singleSpell spell
-		err = rows.Scan(&singleSpell.ID, &singleSpell.name)
-		if err != nil {
-			log.Fatal(err)
-		}
-		spells = append(spells, &singleSpell)
+	var spells []*Spell
+
+	result := r.DB.Find(&spells)
+	if result.Error != nil {
+		log.Fatal(result.Error)
 	}
 
 	// forgive me father, I know not what else to do

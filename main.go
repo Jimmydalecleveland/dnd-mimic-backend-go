@@ -6,19 +6,19 @@ import (
 	"net/http"
 
 	"github.com/friendsofgo/graphiql"
-	graphql "github.com/graph-gophers/graphql-go"
+	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
+	"github.com/jimmydalecleveland/dnd-mimic-backend-go/database"
 	"github.com/jimmydalecleveland/dnd-mimic-backend-go/datasources"
-	"github.com/jimmydalecleveland/dnd-mimic-backend-go/pgconnect"
 )
 
 func main() {
 	// Open db connection
-	db, err := pgconnect.InitializeDB()
+	db, err := database.InitializeDB()
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
+	// defer db.Close()
 
 	// Read .graphql file for schema
 	schemaToString, err := ioutil.ReadFile("./schema/schema.graphql")

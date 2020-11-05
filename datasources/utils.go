@@ -1,14 +1,14 @@
 package datasources
 
 import (
-	"database/sql"
 	"strconv"
 
 	graphql "github.com/graph-gophers/graphql-go"
+	"gorm.io/gorm"
 )
 
 type Resolver struct {
-	DB *sql.DB
+	DB *gorm.DB
 }
 
 // This is nutty, but converting from an int32 to a string requires it to first

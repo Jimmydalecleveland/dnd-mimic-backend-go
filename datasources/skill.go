@@ -6,14 +6,18 @@ import (
 	graphql "github.com/graph-gophers/graphql-go"
 )
 
-type skill struct {
+type Skill struct {
 	ID      int32
-	name    string
-	ability string
+	Name    string
+	Ability string
+}
+
+func (Skill) TableName() string {
+	return "Skill"
 }
 
 type SkillResolver struct {
-	s *skill
+	s *Skill
 }
 
 func (r *SkillResolver) ID() graphql.ID {
@@ -21,31 +25,19 @@ func (r *SkillResolver) ID() graphql.ID {
 }
 
 func (r *SkillResolver) Name() string {
-	return r.s.name
+	return r.s.Name
 }
 
 func (r *SkillResolver) Ability() string {
-	return r.s.ability
+	return r.s.Ability
 }
 
 func (r *Resolver) Skills() *[]*SkillResolver {
-	var skills []*skill
-	var err error
-	skillQuery := `
-		Select "ID", name, ability FROM "Skill"
-	`
+	var skills []*Skill
 
-	rows, err := r.DB.Query(skillQuery)
-	if err != nil {
-		log.Fatal(err)
-	}
-	for rows.Next() {
-		var singleSkill skill
-		err = rows.Scan(&singleSkill.ID, &singleSkill.name, &singleSkill.ability)
-		if err != nil {
-			log.Fatal(err)
-		}
-		skills = append(skills, &singleSkill)
+	result := r.DB.Find(&skills)
+	if result.Error != nil {
+		log.Fatal(result.Error)
 	}
 
 	var xSkillResolver []*SkillResolver
