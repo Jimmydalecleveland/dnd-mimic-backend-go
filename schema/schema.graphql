@@ -2,6 +2,8 @@ type Query {
 	spell(ID: ID!): Spell
 	spells: [Spell!]
 	skills: [Skill!]
+	character(ID: ID!): Character
+	characters: [Character!]
 }
 
 type Spell {
@@ -20,4 +22,19 @@ type Skill {
 	ID: ID!
 	name: String!
 	ability: String!
+}
+
+type Character {
+	ID: ID!
+	name: String
+	str: Int
+	dex: Int
+	con: Int
+	int: Int
+	wis: Int
+	cha: Int
+	HP: Int
+	gp: Int
+	sp: Int
+	cp: Int
 }
