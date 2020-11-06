@@ -45,4 +45,10 @@ type Character {
 type Race {
 	ID: ID!
 	name: String!
+	subraces: [Subrace]
+}
+
+type Subrace {
+	ID: ID!
+	name: String!
 }

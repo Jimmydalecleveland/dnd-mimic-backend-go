@@ -91,7 +91,7 @@ func (r *CharacterResolver) Race() *RaceResolver {
 
 func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *CharacterResolver {
 	var character Character
-	result := r.DB.Debug().Preload("Race").First(&character, args.ID)
+	result := r.DB.Preload("Race").First(&character, args.ID)
 	if result.Error != nil {
 		return nil
 	}
