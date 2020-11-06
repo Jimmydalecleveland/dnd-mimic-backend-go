@@ -15,6 +15,26 @@ type Tabler interface {
 	TableName() string
 }
 
+type Character struct {
+	ID     int32 `gorm:"column:ID"`
+	Name   string
+	RaceID int32 `gorm:"column:raceID"`
+	Race   Race  `gorm:"foreignKey:raceID"`
+}
+
+func (Character) TableName() string {
+	return "Character"
+}
+
+type Race struct {
+	ID   int32 `gorm:"column:ID"`
+	Name string
+}
+
+func (Race) TableName() string {
+	return "Race"
+}
+
 func InitializeDB() (*gorm.DB, error) {
 	envErr := godotenv.Load(".env")
 	if envErr != nil {
@@ -34,7 +54,6 @@ func InitializeDB() (*gorm.DB, error) {
 	if err != nil {
 		panic("failed to connect to database")
 	}
-
 	fmt.Println("Connected to postgres db")
 
 	return db, nil

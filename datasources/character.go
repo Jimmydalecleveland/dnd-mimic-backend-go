@@ -8,18 +8,20 @@ import (
 )
 
 type Character struct {
-	ID   int32 `gorm:"column:ID"`
-	Name string
-	Str  int32
-	Dex  int32
-	Con  int32
-	Int  int32
-	Wis  int32
-	Cha  int32
-	HP   int32 `gorm:"column:HP"`
-	Gp   int32
-	Sp   int32
-	Cp   int32
+	ID     int32 `gorm:"column:ID"`
+	Name   string
+	RaceID int32 `gorm:"column:raceID"`
+	Race   Race  `gorm:"foreignKey:raceID"`
+	Str    int32
+	Dex    int32
+	Con    int32
+	Int    int32
+	Wis    int32
+	Cha    int32
+	HP     int32 `gorm:"column:HP"`
+	Gp     int32
+	Sp     int32
+	Cp     int32
 }
 
 func (Character) TableName() string {
@@ -83,19 +85,24 @@ func (r *CharacterResolver) Cp() *int32 {
 	return &r.c.Cp
 }
 
+func (r *CharacterResolver) Race() *RaceResolver {
+	return &RaceResolver{r: &r.c.Race}
+}
+
 func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *CharacterResolver {
 	var character Character
-	result := r.DB.First(&character, args.ID)
+	result := r.DB.Debug().Preload("Race").First(&character, args.ID)
 	if result.Error != nil {
 		return nil
 	}
+
 	return &CharacterResolver{c: &character}
 }
 
 func (r *Resolver) Characters() *[]*CharacterResolver {
 	var characters []*Character
 
-	result := r.DB.Find(&characters)
+	result := r.DB.Preload("Race").Find(&characters)
 	if result.Error != nil {
 		log.Fatal(result.Error)
 	}

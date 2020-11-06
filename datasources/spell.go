@@ -5,7 +5,6 @@ import (
 	"log"
 
 	graphql "github.com/graph-gophers/graphql-go"
-	_ "github.com/lib/pq"
 )
 
 type Spell struct {
