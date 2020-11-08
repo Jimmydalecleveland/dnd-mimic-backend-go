@@ -8,21 +8,30 @@ import (
 )
 
 type Character struct {
-	ID     int32
-	Name   string
-	RaceID int32
-	Race   Race
-	Skills []Skill
-	Str    int32
-	Dex    int32
-	Con    int32
-	Int    int32
-	Wis    int32
-	Cha    int32
-	HP     int32
-	Gp     int32
-	Sp     int32
-	Cp     int32
+	ID    int32
+	Name  string
+	MaxHP int32
+	HP    int32
+	Str   int32
+	Dex   int32
+	Con   int32
+	Int   int32
+	Wis   int32
+	Cha   int32
+	Gp    int32
+	Sp    int32
+	Cp    int32
+	Ep    int32
+	Pp    int32
+	// CharClassID  int32
+	// RaceID       int32
+	// UserID       int32
+	// BackgroundID int32
+	// SpecID       int32
+	// SubraceID    int32
+	// Deathsaves   string
+	// Race   Race
+	// Skills []Skill
 }
 
 func (Character) TableName() string {
@@ -44,6 +53,14 @@ func (r *CharacterResolver) Name() *string {
 		return nil
 	}
 	return &name
+}
+
+func (r *CharacterResolver) MaxHP() *int32 {
+	return &r.c.MaxHP
+}
+
+func (r *CharacterResolver) HP() *int32 {
+	return &r.c.HP
 }
 
 func (r *CharacterResolver) Str() *int32 {
@@ -70,10 +87,6 @@ func (r *CharacterResolver) Cha() *int32 {
 	return &r.c.Cha
 }
 
-func (r *CharacterResolver) HP() *int32 {
-	return &r.c.HP
-}
-
 func (r *CharacterResolver) Gp() *int32 {
 	return &r.c.Gp
 }
@@ -86,23 +99,49 @@ func (r *CharacterResolver) Cp() *int32 {
 	return &r.c.Cp
 }
 
-func (r *CharacterResolver) Race() *RaceResolver {
-	return &RaceResolver{r: &r.c.Race}
-}
+// func (r *CharacterResolver) Race() *RaceResolver {
+// 	return &RaceResolver{r: &r.c.Race}
+// }
 
-func (r *CharacterResolver) Skills() *[]*SkillResolver {
-	var xSkillResolver []*SkillResolver
-	for _, s := range r.c.Skills {
-		xSkillResolver = append(xSkillResolver, &SkillResolver{&s})
-	}
-	return &xSkillResolver
-}
+// func (r *CharacterResolver) Skills() *[]*SkillResolver {
+// 	var xSkillResolver []*SkillResolver
+// 	for _, s := range r.c.Skills {
+// 		xSkillResolver = append(xSkillResolver, &SkillResolver{&s})
+// 	}
+// 	return &xSkillResolver
+// }
 
 func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *CharacterResolver {
-	q := `Select * FROM "Character" WHERE "ID" = $1`
+	q := `
+		Select c."ID", c.name, c."maxHP", c."HP", c.str, c.dex, c.con, c.int, c.wis, c.cha, c.gp, c.sp, c.cp, c.ep, c.pp
+		FROM "Character" c
+		WHERE "ID" = $1
+	`
+
 	var character Character
-	err := r.DB.QueryRow(q, args.ID).Scan(&character.ID, &character.Name)
+	err := r.DB.
+		QueryRow(q, args.ID).
+		Scan(
+			&character.ID,
+			&character.Name,
+			&character.MaxHP,
+			&character.HP,
+			&character.Str,
+			&character.Dex,
+			&character.Con,
+			&character.Int,
+			&character.Wis,
+			&character.Cha,
+			&character.Gp,
+			&character.Sp,
+			&character.Cp,
+			&character.Ep,
+			&character.Pp,
+		)
+
 	if err != nil {
+		// TODO: figure out how to return empty object to GraphQL, or some non-breaking behavior
+		// when no record is found
 		log.Fatal(err)
 	}
 
