@@ -30,6 +30,7 @@ type Character {
 	ID: ID!
 	name: String
 	race: Race!
+	skills: [Skill]
 	str: Int
 	dex: Int
 	con: Int

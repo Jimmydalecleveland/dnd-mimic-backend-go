@@ -1,41 +1,20 @@
 package database
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 
 	"github.com/joho/godotenv"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	// required for database/sql to work with postgresql
+	_ "github.com/lib/pq"
 )
 
-type Tabler interface {
-	TableName() string
-}
-
-type Character struct {
-	ID     int32 `gorm:"column:ID"`
-	Name   string
-	RaceID int32 `gorm:"column:raceID"`
-	Race   Race  `gorm:"foreignKey:raceID"`
-}
-
-func (Character) TableName() string {
-	return "Character"
-}
-
-type Race struct {
-	ID   int32 `gorm:"column:ID"`
-	Name string
-}
-
-func (Race) TableName() string {
-	return "Race"
-}
-
-func InitializeDB() (*gorm.DB, error) {
+// Init starts up a postgresql database connection
+func Init() (*sql.DB, error) {
 	envErr := godotenv.Load(".env")
 	if envErr != nil {
 		return nil, errors.New("error loading database .env file")
@@ -48,13 +27,17 @@ func InitializeDB() (*gorm.DB, error) {
 		password = os.Getenv("PGPASSWORD")
 	)
 
-	dsn := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s", host, port, user, password, dbname)
-
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s", host, port, user, password, dbname)
+	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
-		panic("failed to connect to database")
+		return nil, err
 	}
-	fmt.Println("Connected to postgres db")
 
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println("Connected to db")
 	return db, nil
 }

@@ -63,27 +63,32 @@ func (r *RaceResolver) Subraces() *[]*RaceResolver {
 // }
 
 func (r *Resolver) Race(ctx context.Context, args struct{ ID int32 }) *RaceResolver {
+	q := `Select * FROM "Race" WHERE "ID" = $1`
 	var race Race
-	// var raw = `
-	// SELECT * FROM "Race"
-	// INNER JOIN "Race" sr ON "Race"."ID" = sr."parentRaceID"
-	// WHERE "Race"."ID" = ?
-	// `
-	// result := r.DB.Raw(raw, args.ID).Scan(&race)
-	result := r.DB.First(&race, args.ID)
-	if result.Error != nil {
-		return nil
+	err := r.DB.QueryRow(q, args.ID).Scan(&race.ID, &race.Name)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	return &RaceResolver{r: &race}
 }
 
 func (r *Resolver) Races() *[]*RaceResolver {
+	q := `SELECT * FROM "Race"`
 	var races []*Race
 
-	result := r.DB.Find(&races)
-	if result.Error != nil {
-		log.Fatal(result.Error)
+	rows, err := r.DB.Query(q)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for rows.Next() {
+		var race Race
+		err = rows.Scan(&race.ID, &race.Name)
+		if err != nil {
+			log.Fatal(err)
+		}
+		races = append(races, &race)
 	}
 
 	var xRaceResolver []*RaceResolver
@@ -92,14 +97,4 @@ func (r *Resolver) Races() *[]*RaceResolver {
 	}
 
 	return &xRaceResolver
-}
-
-func (r *Resolver) Subrace(ctx context.Context, args struct{ ID int32 }) *RaceResolver {
-	var subrace Race
-	result := r.DB.Preload("Race").First(&subrace, args.ID)
-	if result.Error != nil {
-		return nil
-	}
-
-	return &RaceResolver{r: &subrace}
 }

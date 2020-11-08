@@ -35,9 +35,22 @@ func (r *SkillResolver) Ability() string {
 func (r *Resolver) Skills() *[]*SkillResolver {
 	var skills []*Skill
 
-	result := r.DB.Find(&skills)
-	if result.Error != nil {
-		log.Fatal(result.Error)
+	var err error
+	skillQuery := `
+		Select "ID", name, ability FROM "Skill"
+	`
+
+	rows, err := r.DB.Query(skillQuery)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for rows.Next() {
+		var singleSkill Skill
+		err = rows.Scan(&singleSkill.ID, &singleSkill.Name, &singleSkill.Ability)
+		if err != nil {
+			log.Fatal(err)
+		}
+		skills = append(skills, &singleSkill)
 	}
 
 	var xSkillResolver []*SkillResolver

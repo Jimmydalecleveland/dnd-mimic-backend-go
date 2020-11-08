@@ -14,11 +14,11 @@ import (
 
 func main() {
 	// Open db connection
-	db, err := database.InitializeDB()
+	db, err := database.Init()
 	if err != nil {
 		log.Fatal(err)
 	}
-	// defer db.Close()
+	defer db.Close()
 
 	// Read .graphql file for schema
 	schemaToString, err := ioutil.ReadFile("./schema/schema.graphql")

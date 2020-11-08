@@ -8,17 +8,18 @@ import (
 )
 
 type Character struct {
-	ID     int32 `gorm:"column:ID"`
+	ID     int32
 	Name   string
-	RaceID int32 `gorm:"column:raceID"`
-	Race   Race  `gorm:"foreignKey:raceID"`
+	RaceID int32
+	Race   Race
+	Skills []Skill
 	Str    int32
 	Dex    int32
 	Con    int32
 	Int    int32
 	Wis    int32
 	Cha    int32
-	HP     int32 `gorm:"column:HP"`
+	HP     int32
 	Gp     int32
 	Sp     int32
 	Cp     int32
@@ -89,22 +90,41 @@ func (r *CharacterResolver) Race() *RaceResolver {
 	return &RaceResolver{r: &r.c.Race}
 }
 
+func (r *CharacterResolver) Skills() *[]*SkillResolver {
+	var xSkillResolver []*SkillResolver
+	for _, s := range r.c.Skills {
+		xSkillResolver = append(xSkillResolver, &SkillResolver{&s})
+	}
+	return &xSkillResolver
+}
+
 func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *CharacterResolver {
+	q := `Select * FROM "Character" WHERE "ID" = $1`
 	var character Character
-	result := r.DB.Preload("Race").First(&character, args.ID)
-	if result.Error != nil {
-		return nil
+	err := r.DB.QueryRow(q, args.ID).Scan(&character.ID, &character.Name)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	return &CharacterResolver{c: &character}
 }
 
 func (r *Resolver) Characters() *[]*CharacterResolver {
+	q := `SELECT * FROM "Character"`
 	var characters []*Character
 
-	result := r.DB.Preload("Race").Find(&characters)
-	if result.Error != nil {
-		log.Fatal(result.Error)
+	rows, err := r.DB.Query(q)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for rows.Next() {
+		var character Character
+		err = rows.Scan(&character.ID, &character.Name)
+		if err != nil {
+			log.Fatal(err)
+		}
+		characters = append(characters, &character)
 	}
 
 	var xCharacterResolver []*CharacterResolver

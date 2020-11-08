@@ -8,11 +8,11 @@ import (
 )
 
 type Spell struct {
-	ID          int32 `gorm:"column:ID"`
+	ID          int32
 	Name        string
 	Level       int32
 	School      string
-	CastingTime string `gorm:"column:castingTime"`
+	CastingTime string
 	Range       string
 	Components  string
 	Duration    string
@@ -64,9 +64,26 @@ func (r *SpellResolver) Description() *string {
 }
 
 func (r *Resolver) Spell(ctx context.Context, args struct{ ID int32 }) *SpellResolver {
+	spellQuery := `
+		Select * FROM "Spell"
+		WHERE "ID" = $1
+	`
 	var spell Spell
-	result := r.DB.First(&spell, args.ID)
-	if result.Error != nil {
+	err := r.DB.
+		QueryRow(spellQuery, args.ID).
+		Scan(
+			&spell.ID,
+			&spell.Name,
+			&spell.Level,
+			&spell.School,
+			&spell.CastingTime,
+			&spell.Range,
+			&spell.Components,
+			&spell.Duration,
+			&spell.Description,
+		)
+
+	if err != nil {
 		return nil
 	}
 	return &SpellResolver{s: &spell}
@@ -75,9 +92,33 @@ func (r *Resolver) Spell(ctx context.Context, args struct{ ID int32 }) *SpellRes
 func (r *Resolver) Spells() *[]*SpellResolver {
 	var spells []*Spell
 
-	result := r.DB.Find(&spells)
-	if result.Error != nil {
-		log.Fatal(result.Error)
+	var err error
+	spellQuery := `
+		Select * FROM "Spell"
+	`
+	rows, err := r.DB.Query(spellQuery)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for rows.Next() {
+		var spell Spell
+		err = rows.
+			Scan(
+				&spell.ID,
+				&spell.Name,
+				&spell.Level,
+				&spell.School,
+				&spell.CastingTime,
+				&spell.Range,
+				&spell.Components,
+				&spell.Duration,
+				&spell.Description,
+			)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+		spells = append(spells, &spell)
 	}
 
 	// forgive me father, I know not what else to do
