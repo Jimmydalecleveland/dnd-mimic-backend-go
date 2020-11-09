@@ -15,7 +15,7 @@ type Race struct {
 }
 
 type RaceResolver struct {
-	r *Race
+	r Race
 	s []Race
 }
 
@@ -79,7 +79,7 @@ func (r *Resolver) Race(ctx context.Context, args struct{ ID int32 }) *RaceResol
 		subraces = append(subraces, singleRace)
 	}
 
-	return &RaceResolver{r: &race, s: subraces}
+	return &RaceResolver{r: race, s: subraces}
 }
 
 // func (r *Resolver) Races() *[]*RaceResolver {

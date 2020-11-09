@@ -39,17 +39,17 @@ func (Character) TableName() string {
 }
 
 type CharacterResolver struct {
-	c       *Character
-	race    *Race
-	subrace *Race
+	character Character
+	race      Race
+	subrace   Race
 }
 
 func (r *CharacterResolver) ID() graphql.ID {
-	return Int32ToGraphqlID(r.c.ID)
+	return Int32ToGraphqlID(r.character.ID)
 }
 
 func (r *CharacterResolver) Name() *string {
-	name := r.c.Name
+	name := r.character.Name
 	// should we return nil for gql?
 	if name == "" {
 		return nil
@@ -58,47 +58,47 @@ func (r *CharacterResolver) Name() *string {
 }
 
 func (r *CharacterResolver) MaxHP() *int32 {
-	return &r.c.MaxHP
+	return &r.character.MaxHP
 }
 
 func (r *CharacterResolver) HP() *int32 {
-	return &r.c.HP
+	return &r.character.HP
 }
 
 func (r *CharacterResolver) Str() *int32 {
-	return &r.c.Str
+	return &r.character.Str
 }
 
 func (r *CharacterResolver) Dex() *int32 {
-	return &r.c.Dex
+	return &r.character.Dex
 }
 
 func (r *CharacterResolver) Con() *int32 {
-	return &r.c.Con
+	return &r.character.Con
 }
 
 func (r *CharacterResolver) Int() *int32 {
-	return &r.c.Int
+	return &r.character.Int
 }
 
 func (r *CharacterResolver) Wis() *int32 {
-	return &r.c.Wis
+	return &r.character.Wis
 }
 
 func (r *CharacterResolver) Cha() *int32 {
-	return &r.c.Cha
+	return &r.character.Cha
 }
 
 func (r *CharacterResolver) Gp() *int32 {
-	return &r.c.Gp
+	return &r.character.Gp
 }
 
 func (r *CharacterResolver) Sp() *int32 {
-	return &r.c.Sp
+	return &r.character.Sp
 }
 
 func (r *CharacterResolver) Cp() *int32 {
-	return &r.c.Cp
+	return &r.character.Cp
 }
 
 func (r *CharacterResolver) Race() *RaceResolver {
@@ -169,7 +169,7 @@ func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *Char
 		log.Fatal(err)
 	}
 
-	return &CharacterResolver{c: &character, race: &race, subrace: &subrace}
+	return &CharacterResolver{character, race, subrace}
 }
 
 // func (r *Resolver) Characters() *[]*CharacterResolver {
