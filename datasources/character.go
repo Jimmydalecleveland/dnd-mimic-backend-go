@@ -39,7 +39,8 @@ func (Character) TableName() string {
 }
 
 type CharacterResolver struct {
-	c *Character
+	c    *Character
+	race *Race
 }
 
 func (r *CharacterResolver) ID() graphql.ID {
@@ -99,9 +100,9 @@ func (r *CharacterResolver) Cp() *int32 {
 	return &r.c.Cp
 }
 
-// func (r *CharacterResolver) Race() *RaceResolver {
-// 	return &RaceResolver{r: &r.c.Race}
-// }
+func (r *CharacterResolver) Race() *RaceResolver {
+	return &RaceResolver{r: r.race}
+}
 
 // func (r *CharacterResolver) Skills() *[]*SkillResolver {
 // 	var xSkillResolver []*SkillResolver
@@ -113,12 +114,13 @@ func (r *CharacterResolver) Cp() *int32 {
 
 func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *CharacterResolver {
 	q := `
-		Select c."ID", c.name, c."maxHP", c."HP", c.str, c.dex, c.con, c.int, c.wis, c.cha, c.gp, c.sp, c.cp, c.ep, c.pp
+		SELECT c."ID", c.name, c."maxHP", c."HP", c.str, c.dex, c.con, c.int, c.wis, c.cha, c.gp, c.sp, c.cp, c.ep, c.pp, c."raceID"
 		FROM "Character" c
 		WHERE "ID" = $1
 	`
 
 	var character Character
+	var raceID int32
 	err := r.DB.
 		QueryRow(q, args.ID).
 		Scan(
@@ -137,6 +139,7 @@ func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *Char
 			&character.Cp,
 			&character.Ep,
 			&character.Pp,
+			&raceID,
 		)
 
 	if err != nil {
@@ -145,31 +148,59 @@ func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *Char
 		log.Fatal(err)
 	}
 
-	return &CharacterResolver{c: &character}
-}
-
-func (r *Resolver) Characters() *[]*CharacterResolver {
-	q := `SELECT * FROM "Character"`
-	var characters []*Character
-
-	rows, err := r.DB.Query(q)
+	q2 := `Select "Race"."ID", "Race".name FROM "Race" WHERE "ID" = $1`
+	var race Race
+	err = r.DB.QueryRow(q2, raceID).Scan(&race.ID, &race.Name)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for rows.Next() {
-		var character Character
-		err = rows.Scan(&character.ID, &character.Name)
-		if err != nil {
-			log.Fatal(err)
-		}
-		characters = append(characters, &character)
-	}
-
-	var xCharacterResolver []*CharacterResolver
-	for _, c := range characters {
-		xCharacterResolver = append(xCharacterResolver, &CharacterResolver{c})
-	}
-
-	return &xCharacterResolver
+	return &CharacterResolver{c: &character, race: &race}
 }
+
+// func (r *Resolver) Characters() *[]*CharacterResolver {
+// 	q := `
+// 	Select c."ID", c.name, c."maxHP", c."HP", c.str, c.dex, c.con, c.int, c.wis, c.cha, c.gp, c.sp, c.cp, c.ep, c.pp
+// 	FROM "Character"
+// 	`
+// 	var characters []*Character
+
+// 	rows, err := r.DB.Query(q)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+
+// 	for rows.Next() {
+// 		var character Character
+// 		err = rows.
+// 			Scan(
+// 				&character.ID,
+// 				&character.Name,
+// 				&character.MaxHP,
+// 				&character.HP,
+// 				&character.Str,
+// 				&character.Dex,
+// 				&character.Con,
+// 				&character.Int,
+// 				&character.Wis,
+// 				&character.Cha,
+// 				&character.Gp,
+// 				&character.Sp,
+// 				&character.Cp,
+// 				&character.Ep,
+// 				&character.Pp,
+// 			)
+
+// 		if err != nil {
+// 			log.Fatal(err)
+// 		}
+// 		characters = append(characters, &character)
+// 	}
+
+// 	var xCharacterResolver []*CharacterResolver
+// 	for _, c := range characters {
+// 		xCharacterResolver = append(xCharacterResolver, &CharacterResolver{c})
+// 	}
+
+// 	return &xCharacterResolver
+// }
