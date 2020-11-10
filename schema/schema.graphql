@@ -3,7 +3,7 @@ type Query {
 	spells: [Spell!]
 	skills: [Skill!]
 	character(ID: ID!): Character
-	# characters: [Character!]
+	characters: [Character!]
 	race(ID: ID!): Race
 	# races: [Race!]
 }

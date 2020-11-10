@@ -25,7 +25,7 @@ type Character struct {
 	Ep        int32
 	Pp        int32
 	RaceID    int32
-	SubraceID int32
+	SubraceID *int32
 	// CharClassID  int32
 	// UserID       int32
 	// BackgroundID int32
@@ -108,10 +108,10 @@ func (r *CharacterResolver) Race(ctx context.Context) *RaceResolver {
 }
 
 func (r *CharacterResolver) Subrace(ctx context.Context) *RaceResolver {
-	if r.character.SubraceID == 0 {
+	if r.character.SubraceID == nil {
 		return nil
 	}
-	subrace := queryRace(r.db, r.character.SubraceID)
+	subrace := queryRace(r.db, *r.character.SubraceID)
 	return &RaceResolver{r: subrace}
 }
 
@@ -163,49 +163,51 @@ func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *Char
 	return &CharacterResolver{character: character, db: r.DB}
 }
 
-// func (r *Resolver) Characters() *[]*CharacterResolver {
-// 	q := `
-// 	Select c."ID", c.name, c."maxHP", c."HP", c.str, c.dex, c.con, c.int, c.wis, c.cha, c.gp, c.sp, c.cp, c.ep, c.pp
-// 	FROM "Character"
-// 	`
-// 	var characters []*Character
+func (r *Resolver) Characters() *[]*CharacterResolver {
+	q := `
+	Select c."ID", c.name, c."maxHP", c."HP", c.str, c.dex, c.con, c.int, c.wis, c.cha, c.gp, c.sp, c.cp, c.ep, c.pp, c."raceID", c."subraceID"
+	FROM "Character" c
+	`
+	var characters []Character
 
-// 	rows, err := r.DB.Query(q)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+	rows, err := r.DB.Query(q)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-// 	for rows.Next() {
-// 		var character Character
-// 		err = rows.
-// 			Scan(
-// 				&character.ID,
-// 				&character.Name,
-// 				&character.MaxHP,
-// 				&character.HP,
-// 				&character.Str,
-// 				&character.Dex,
-// 				&character.Con,
-// 				&character.Int,
-// 				&character.Wis,
-// 				&character.Cha,
-// 				&character.Gp,
-// 				&character.Sp,
-// 				&character.Cp,
-// 				&character.Ep,
-// 				&character.Pp,
-// 			)
+	for rows.Next() {
+		var character Character
+		err = rows.
+			Scan(
+				&character.ID,
+				&character.Name,
+				&character.MaxHP,
+				&character.HP,
+				&character.Str,
+				&character.Dex,
+				&character.Con,
+				&character.Int,
+				&character.Wis,
+				&character.Cha,
+				&character.Gp,
+				&character.Sp,
+				&character.Cp,
+				&character.Ep,
+				&character.Pp,
+				&character.RaceID,
+				&character.SubraceID,
+			)
 
-// 		if err != nil {
-// 			log.Fatal(err)
-// 		}
-// 		characters = append(characters, &character)
-// 	}
+		if err != nil {
+			log.Fatal(err)
+		}
+		characters = append(characters, character)
+	}
 
-// 	var xCharacterResolver []*CharacterResolver
-// 	for _, c := range characters {
-// 		xCharacterResolver = append(xCharacterResolver, &CharacterResolver{c})
-// 	}
+	var xCharacterResolver []*CharacterResolver
+	for _, character := range characters {
+		xCharacterResolver = append(xCharacterResolver, &CharacterResolver{character: character, db: r.DB})
+	}
 
-// 	return &xCharacterResolver
-// }
+	return &xCharacterResolver
+}
