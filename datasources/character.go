@@ -2,33 +2,34 @@ package datasources
 
 import (
 	"context"
+	"database/sql"
 	"log"
 
 	graphql "github.com/graph-gophers/graphql-go"
 )
 
 type Character struct {
-	ID    int32
-	Name  string
-	MaxHP int32
-	HP    int32
-	Str   int32
-	Dex   int32
-	Con   int32
-	Int   int32
-	Wis   int32
-	Cha   int32
-	Gp    int32
-	Sp    int32
-	Cp    int32
-	Ep    int32
-	Pp    int32
+	ID        int32
+	Name      string
+	MaxHP     int32
+	HP        int32
+	Str       int32
+	Dex       int32
+	Con       int32
+	Int       int32
+	Wis       int32
+	Cha       int32
+	Gp        int32
+	Sp        int32
+	Cp        int32
+	Ep        int32
+	Pp        int32
+	RaceID    int32
+	SubraceID int32
 	// CharClassID  int32
-	// RaceID       int32
 	// UserID       int32
 	// BackgroundID int32
 	// SpecID       int32
-	// SubraceID    int32
 	// Deathsaves   string
 	// Race   Race
 	// Skills []Skill
@@ -40,8 +41,7 @@ func (Character) TableName() string {
 
 type CharacterResolver struct {
 	character Character
-	race      Race
-	subrace   Race
+	db        *sql.DB
 }
 
 func (r *CharacterResolver) ID() graphql.ID {
@@ -101,12 +101,18 @@ func (r *CharacterResolver) Cp() *int32 {
 	return &r.character.Cp
 }
 
-func (r *CharacterResolver) Race() *RaceResolver {
-	return &RaceResolver{r: r.race}
+func (r *CharacterResolver) Race(ctx context.Context) *RaceResolver {
+	race := queryRace(r.db, r.character.RaceID)
+	subraces := querySubraces(r.db, r.character.RaceID)
+	return &RaceResolver{r: race, s: subraces}
 }
 
-func (r *CharacterResolver) Subrace() *RaceResolver {
-	return &RaceResolver{r: r.subrace}
+func (r *CharacterResolver) Subrace(ctx context.Context) *RaceResolver {
+	if r.character.SubraceID == 0 {
+		return nil
+	}
+	subrace := queryRace(r.db, r.character.SubraceID)
+	return &RaceResolver{r: subrace}
 }
 
 // func (r *CharacterResolver) Skills() *[]*SkillResolver {
@@ -125,8 +131,6 @@ func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *Char
 	`
 
 	var character Character
-	var raceID int32
-	var subraceID int32
 
 	err := r.DB.
 		QueryRow(q, args.ID).
@@ -146,8 +150,8 @@ func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *Char
 			&character.Cp,
 			&character.Ep,
 			&character.Pp,
-			&raceID,
-			&subraceID,
+			&character.RaceID,
+			&character.SubraceID,
 		)
 
 	if err != nil {
@@ -156,20 +160,7 @@ func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *Char
 		log.Fatal(err)
 	}
 
-	q2 := `Select "Race"."ID", "Race".name FROM "Race" WHERE "ID" = $1`
-	var race Race
-	err = r.DB.QueryRow(q2, raceID).Scan(&race.ID, &race.Name)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var subrace Race
-	err = r.DB.QueryRow(q2, subraceID).Scan(&subrace.ID, &subrace.Name)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return &CharacterResolver{character, race, subrace}
+	return &CharacterResolver{character: character, db: r.DB}
 }
 
 // func (r *Resolver) Characters() *[]*CharacterResolver {

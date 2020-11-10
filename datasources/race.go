@@ -2,6 +2,7 @@ package datasources
 
 import (
 	"context"
+	"database/sql"
 	"log"
 
 	graphql "github.com/graph-gophers/graphql-go"
@@ -40,6 +41,7 @@ func (r *RaceResolver) Subraces() *[]*SubraceResolver {
 	for _, s := range r.s {
 		xSubraceResolver = append(xSubraceResolver, &SubraceResolver{s})
 	}
+
 	return &xSubraceResolver
 }
 
@@ -51,25 +53,28 @@ func (r *SubraceResolver) Name() string {
 	return r.s.Name
 }
 
-func (r *Resolver) Race(ctx context.Context, args struct{ ID int32 }) *RaceResolver {
+func queryRace(db *sql.DB, id int32) Race {
 	q := `Select "Race"."ID", "Race".name FROM "Race" WHERE "ID" = $1`
+	var race Race
+	err := db.QueryRow(q, id).Scan(&race.ID, &race.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return race
+}
+
+func querySubraces(db *sql.DB, id int32) []Race {
 	q2 := `
 		SELECT subrace.* FROM "Race"
 		JOIN "Race" subrace ON "Race"."ID" = subrace."parentRaceID"
 		WHERE "Race"."ID" = $1
 	`
-	var race Race
 	var subraces []Race
-
-	err := r.DB.QueryRow(q, args.ID).Scan(&race.ID, &race.Name)
+	rows, err := db.Query(q2, id)
 	if err != nil {
 		log.Fatal(err)
 	}
-	rows, err := r.DB.Query(q2, 15)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	for rows.Next() {
 		var singleRace Race
 		err = rows.Scan(&singleRace.ID, &singleRace.Name, &singleRace.ParentRaceID, &singleRace.Speed)
@@ -78,6 +83,13 @@ func (r *Resolver) Race(ctx context.Context, args struct{ ID int32 }) *RaceResol
 		}
 		subraces = append(subraces, singleRace)
 	}
+
+	return subraces
+}
+
+func (r *Resolver) Race(ctx context.Context, args struct{ ID int32 }) *RaceResolver {
+	race := queryRace(r.DB, args.ID)
+	subraces := querySubraces(r.DB, args.ID)
 
 	return &RaceResolver{r: race, s: subraces}
 }
