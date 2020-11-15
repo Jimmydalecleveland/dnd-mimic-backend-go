@@ -12,10 +12,6 @@ type Skill struct {
 	Ability string
 }
 
-func (Skill) TableName() string {
-	return "Skill"
-}
-
 type SkillResolver struct {
 	s *Skill
 }
