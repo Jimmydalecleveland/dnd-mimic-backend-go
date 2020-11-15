@@ -34,6 +34,7 @@ type Character {
 	race: Race!
 	subrace: Subrace
 	# skills: [Skill]
+	background: Background
 	str: Int
 	dex: Int
 	con: Int

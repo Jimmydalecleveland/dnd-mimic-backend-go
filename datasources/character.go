@@ -9,26 +9,26 @@ import (
 )
 
 type Character struct {
-	ID        int32
-	Name      string
-	MaxHP     int32
-	HP        int32
-	Str       int32
-	Dex       int32
-	Con       int32
-	Int       int32
-	Wis       int32
-	Cha       int32
-	Gp        int32
-	Sp        int32
-	Cp        int32
-	Ep        int32
-	Pp        int32
-	RaceID    int32
-	SubraceID *int32
+	ID           int32
+	Name         string
+	MaxHP        int32
+	HP           int32
+	Str          int32
+	Dex          int32
+	Con          int32
+	Int          int32
+	Wis          int32
+	Cha          int32
+	Gp           int32
+	Sp           int32
+	Cp           int32
+	Ep           int32
+	Pp           int32
+	RaceID       int32
+	SubraceID    *int32
+	BackgroundID int32
 	// CharClassID  int32
 	// UserID       int32
-	// BackgroundID int32
 	// SpecID       int32
 	// Deathsaves   string
 	// Race   Race
@@ -115,6 +115,11 @@ func (r *CharacterResolver) Subrace(ctx context.Context) *RaceResolver {
 	return &RaceResolver{r: subrace}
 }
 
+func (r *CharacterResolver) Background(ctx context.Context) *BackgroundResolver {
+	b := queryBackground(r.db, r.character.BackgroundID)
+	return &BackgroundResolver{b}
+}
+
 // func (r *CharacterResolver) Skills() *[]*SkillResolver {
 // 	var xSkillResolver []*SkillResolver
 // 	for _, s := range r.c.Skills {
@@ -125,7 +130,7 @@ func (r *CharacterResolver) Subrace(ctx context.Context) *RaceResolver {
 
 func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *CharacterResolver {
 	q := `
-		SELECT c."ID", c.name, c."maxHP", c."HP", c.str, c.dex, c.con, c.int, c.wis, c.cha, c.gp, c.sp, c.cp, c.ep, c.pp, c."raceID", c."subraceID"
+		SELECT c."ID", c.name, c."maxHP", c."HP", c.str, c.dex, c.con, c.int, c.wis, c.cha, c.gp, c.sp, c.cp, c.ep, c.pp, c."raceID", c."subraceID", c."backgroundID"
 		FROM "Character" c
 		WHERE "ID" = $1
 	`
@@ -152,6 +157,7 @@ func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *Char
 			&character.Pp,
 			&character.RaceID,
 			&character.SubraceID,
+			&character.BackgroundID,
 		)
 
 	if err != nil {

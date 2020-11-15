@@ -2,6 +2,7 @@ package datasources
 
 import (
 	"context"
+	"database/sql"
 	"log"
 
 	graphql "github.com/graph-gophers/graphql-go"
@@ -39,14 +40,14 @@ func (r *BackgroundResolver) StartingGp() *int32 {
 	return r.b.StartingGp
 }
 
-func (r *Resolver) Background(ctx context.Context, args struct{ ID int32 }) *BackgroundResolver {
+func queryBackground(db *sql.DB, id int32) Background {
 	var b Background
 	q := `
 	SELECT * FROM "Background"
 	WHERE "ID" = $1
 	`
 
-	err := r.DB.QueryRow(q, args.ID).Scan(
+	err := db.QueryRow(q, id).Scan(
 		&b.ID,
 		&b.Name,
 		&b.Description,
@@ -57,6 +58,11 @@ func (r *Resolver) Background(ctx context.Context, args struct{ ID int32 }) *Bac
 		log.Fatal(err)
 	}
 
+	return b
+}
+
+func (r *Resolver) Background(ctx context.Context, args struct{ ID int32 }) *BackgroundResolver {
+	b := queryBackground(r.DB, args.ID)
 	return &BackgroundResolver{b}
 }
 
