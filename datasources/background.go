@@ -1,6 +1,7 @@
 package datasources
 
 import (
+	"context"
 	"log"
 
 	graphql "github.com/graph-gophers/graphql-go"
@@ -15,7 +16,7 @@ type Background struct {
 }
 
 type BackgroundResolver struct {
-	b *Background
+	b Background
 }
 
 func (r *BackgroundResolver) ID() graphql.ID {
@@ -38,8 +39,29 @@ func (r *BackgroundResolver) StartingGp() *int32 {
 	return r.b.StartingGp
 }
 
+func (r *Resolver) Background(ctx context.Context, args struct{ ID int32 }) *BackgroundResolver {
+	var b Background
+	q := `
+	SELECT * FROM "Background"
+	WHERE "ID" = $1
+	`
+
+	err := r.DB.QueryRow(q, args.ID).Scan(
+		&b.ID,
+		&b.Name,
+		&b.Description,
+		&b.NumExtraLanguages,
+		&b.StartingGp,
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return &BackgroundResolver{b}
+}
+
 func (r *Resolver) Backgrounds() *[]*BackgroundResolver {
-	var backgrounds []*Background
+	var backgrounds []Background
 
 	q := `
 		Select * FROM "Background"
@@ -62,7 +84,7 @@ func (r *Resolver) Backgrounds() *[]*BackgroundResolver {
 		if err != nil {
 			log.Fatal(err)
 		}
-		backgrounds = append(backgrounds, &background)
+		backgrounds = append(backgrounds, background)
 	}
 
 	var xBackgroundResolver []*BackgroundResolver

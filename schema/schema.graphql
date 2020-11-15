@@ -6,6 +6,7 @@ type Query {
 	characters: [Character!]
 	race(ID: ID!): Race
 	# races: [Race!]
+	background(ID: ID!): Background
 	backgrounds: [Background!]
 }
 

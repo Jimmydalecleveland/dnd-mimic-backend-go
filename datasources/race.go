@@ -24,10 +24,6 @@ type SubraceResolver struct {
 	s Race
 }
 
-func (Race) TableName() string {
-	return "Race"
-}
-
 func (r *RaceResolver) ID() graphql.ID {
 	return Int32ToGraphqlID(r.r.ID)
 }
