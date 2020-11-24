@@ -33,7 +33,7 @@ type Character {
 	name: String
 	race: Race!
 	subrace: Subrace
-	# skills: [Skill]
+	skills: [Skill]
 	background: Background
 	str: Int
 	dex: Int

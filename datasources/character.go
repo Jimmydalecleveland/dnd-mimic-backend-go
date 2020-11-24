@@ -32,7 +32,6 @@ type Character struct {
 	// SpecID       int32
 	// Deathsaves   string
 	// Race   Race
-	// Skills []Skill
 }
 
 func (Character) TableName() string {
@@ -120,13 +119,34 @@ func (r *CharacterResolver) Background(ctx context.Context) *BackgroundResolver 
 	return &BackgroundResolver{b}
 }
 
-// func (r *CharacterResolver) Skills() *[]*SkillResolver {
-// 	var xSkillResolver []*SkillResolver
-// 	for _, s := range r.c.Skills {
-// 		xSkillResolver = append(xSkillResolver, &SkillResolver{&s})
-// 	}
-// 	return &xSkillResolver
-// }
+func (r *CharacterResolver) Skills() *[]*SkillResolver {
+	var skills []*Skill
+
+	charSkillQuery := `
+	SELECT "Skill".* FROM "CharSkillProficiency"
+	JOIN "Skill" ON "Skill"."ID" = "CharSkillProficiency"."skillID"
+	WHERE "CharSkillProficiency"."charID" = $1
+	`
+
+	rows, err := r.db.Query(charSkillQuery, r.character.ID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for rows.Next() {
+		var skill Skill
+		err = rows.Scan(&skill.ID, &skill.Name, &skill.Ability)
+		if err != nil {
+			log.Fatal(err)
+		}
+		skills = append(skills, &skill)
+	}
+
+	var xSkillResolver []*SkillResolver
+	for _, s := range skills {
+		xSkillResolver = append(xSkillResolver, &SkillResolver{s})
+	}
+	return &xSkillResolver
+}
 
 func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *CharacterResolver {
 	q := `
