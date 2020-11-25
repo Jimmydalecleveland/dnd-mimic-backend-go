@@ -8,6 +8,7 @@ type Query {
 	# races: [Race!]
 	background(ID: ID!): Background
 	backgrounds: [Background!]
+	classes: [Class!]
 }
 
 type Spell {
@@ -64,4 +65,12 @@ type Background {
 	description: String!
 	numExtraLanguages: Int
 	startingGp: Int
+}
+
+type Class {
+	ID: ID!
+	name: String!
+	hitDice: String!
+	numSkillProficiencies: Int!
+	# savingThrowProficiencies: [String!]
 }
