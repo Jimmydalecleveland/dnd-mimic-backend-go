@@ -1,9 +1,11 @@
 package datasources
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/graph-gophers/graphql-go"
+	"github.com/lib/pq"
 )
 
 type Class struct {
@@ -11,14 +13,14 @@ type Class struct {
 	Name                     string
 	HitDice                  string
 	NumSkillProficiencies    int32
-	SavingThrowProficiencies []uint8
+	SavingThrowProficiencies []string
 }
 
 type ClassResolver struct {
 	c Class
 }
 
-func (r *ClassResolver) ID() graphql.ID {
+func (r ClassResolver) ID() graphql.ID {
 	return Int32ToGraphqlID(r.c.ID)
 }
 
@@ -34,7 +36,12 @@ func (r ClassResolver) NumSkillProficiencies() int32 {
 	return r.c.NumSkillProficiencies
 }
 
-func (r *Resolver) Classes() *[]*ClassResolver {
+func (r ClassResolver) SavingThrowProficiencies() *[]string {
+	fmt.Println(r.c.SavingThrowProficiencies)
+	return &r.c.SavingThrowProficiencies
+}
+
+func (r *Resolver) Classes() *[]ClassResolver {
 	var classes []Class
 	q := `
 		SELECT * FROM "CharClass"	
@@ -52,7 +59,7 @@ func (r *Resolver) Classes() *[]*ClassResolver {
 			&class.Name,
 			&class.HitDice,
 			&class.NumSkillProficiencies,
-			&class.SavingThrowProficiencies,
+			pq.Array(&class.SavingThrowProficiencies),
 		)
 		if err != nil {
 			log.Fatal(err)
@@ -60,9 +67,9 @@ func (r *Resolver) Classes() *[]*ClassResolver {
 		classes = append(classes, class)
 	}
 
-	var xClassResolver []*ClassResolver
+	var xClassResolver []ClassResolver
 	for _, c := range classes {
-		xClassResolver = append(xClassResolver, &ClassResolver{c})
+		xClassResolver = append(xClassResolver, ClassResolver{c})
 	}
 
 	return &xClassResolver

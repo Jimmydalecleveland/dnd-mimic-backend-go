@@ -72,5 +72,5 @@ type Class {
 	name: String!
 	hitDice: String!
 	numSkillProficiencies: Int!
-	# savingThrowProficiencies: [String!]
+	savingThrowProficiencies: [String!]
 }
