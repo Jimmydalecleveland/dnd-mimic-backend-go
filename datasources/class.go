@@ -1,6 +1,7 @@
 package datasources
 
 import (
+	"context"
 	"log"
 
 	"github.com/graph-gophers/graphql-go"
@@ -37,6 +38,26 @@ func (r ClassResolver) NumSkillProficiencies() int32 {
 
 func (r ClassResolver) SavingThrowProficiencies() *[]string {
 	return &r.c.SavingThrowProficiencies
+}
+
+func (r *Resolver) Class(ctx context.Context, args struct{ ID int32 }) *ClassResolver {
+	var c Class
+	q := `
+		SELECT * FROM "CharClass"
+		WHERE "ID" = $1
+	`
+	err := r.DB.QueryRow(q, args.ID).Scan(
+		&c.ID,
+		&c.Name,
+		&c.HitDice,
+		&c.NumSkillProficiencies,
+		pq.Array(&c.SavingThrowProficiencies),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return &ClassResolver{c}
 }
 
 func (r *Resolver) Classes() *[]ClassResolver {

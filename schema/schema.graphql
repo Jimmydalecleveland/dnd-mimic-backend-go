@@ -8,6 +8,7 @@ type Query {
 	# races: [Race!]
 	background(ID: ID!): Background
 	backgrounds: [Background!]
+	class(ID: ID!): Class
 	classes: [Class!]
 }
 
