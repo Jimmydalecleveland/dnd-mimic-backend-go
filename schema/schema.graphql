@@ -5,7 +5,7 @@ type Query {
 	character(ID: ID!): Character
 	characters: [Character!]
 	race(ID: ID!): Race
-	# races: [Race!]
+	races: [Race!]
 	background(ID: ID!): Background
 	backgrounds: [Background!]
 	class(ID: ID!): Class
@@ -61,7 +61,7 @@ type Character {
 type Race {
 	ID: ID!
 	name: String!
-	subraces: [Subrace]
+	subraces: [Subrace]!
 }
 
 type Subrace {

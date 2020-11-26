@@ -12,7 +12,7 @@ type Race struct {
 	ID           int32
 	Name         string
 	Speed        int32
-	ParentRaceID int32
+	ParentRaceID *int32
 }
 
 type RaceResolver struct {
@@ -32,13 +32,13 @@ func (r *RaceResolver) Name() string {
 	return r.r.Name
 }
 
-func (r *RaceResolver) Subraces() *[]*SubraceResolver {
+func (r *RaceResolver) Subraces() []*SubraceResolver {
 	var xSubraceResolver []*SubraceResolver
 	for _, s := range r.s {
 		xSubraceResolver = append(xSubraceResolver, &SubraceResolver{s})
 	}
 
-	return &xSubraceResolver
+	return xSubraceResolver
 }
 
 func (r *SubraceResolver) ID() graphql.ID {
@@ -73,7 +73,12 @@ func querySubraces(db *sql.DB, id int32) []Race {
 	}
 	for rows.Next() {
 		var singleRace Race
-		err = rows.Scan(&singleRace.ID, &singleRace.Name, &singleRace.ParentRaceID, &singleRace.Speed)
+		err = rows.Scan(
+			&singleRace.ID,
+			&singleRace.Name,
+			&singleRace.ParentRaceID,
+			&singleRace.Speed,
+		)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -90,28 +95,35 @@ func (r *Resolver) Race(ctx context.Context, args struct{ ID int32 }) *RaceResol
 	return &RaceResolver{r: race, s: subraces}
 }
 
-// func (r *Resolver) Races() *[]*RaceResolver {
-// 	q := `SELECT * FROM "Race"`
-// 	var races []*Race
+func (r *Resolver) Races() *[]*RaceResolver {
+	q := `SELECT * FROM "Race"`
+	var races []Race
 
-// 	rows, err := r.DB.Query(q)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+	rows, err := r.DB.Query(q)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-// 	for rows.Next() {
-// 		var race Race
-// 		err = rows.Scan(&race.ID, &race.Name)
-// 		if err != nil {
-// 			log.Fatal(err)
-// 		}
-// 		races = append(races, &race)
-// 	}
+	for rows.Next() {
+		var race Race
+		err = rows.Scan(
+			&race.ID,
+			&race.Name,
+			&race.ParentRaceID,
+			&race.Speed,
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-// 	var xRaceResolver []*RaceResolver
-// 	for _, r := range races {
-// 		xRaceResolver = append(xRaceResolver, &RaceResolver{r})
-// 	}
+		races = append(races, race)
+	}
 
-// 	return &xRaceResolver
-// }
+	var xRaceResolver []*RaceResolver
+	for _, race := range races {
+		subraces := querySubraces(r.DB, race.ID)
+		xRaceResolver = append(xRaceResolver, &RaceResolver{r: race, s: subraces})
+	}
+
+	return &xRaceResolver
+}
