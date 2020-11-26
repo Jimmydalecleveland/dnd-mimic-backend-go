@@ -31,7 +31,6 @@ type Character struct {
 	// UserID       int32
 	// SpecID       int32
 	// Deathsaves   string
-	// Race   Race
 }
 
 func (Character) TableName() string {

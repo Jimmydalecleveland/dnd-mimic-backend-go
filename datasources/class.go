@@ -1,7 +1,6 @@
 package datasources
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/graph-gophers/graphql-go"
@@ -37,7 +36,6 @@ func (r ClassResolver) NumSkillProficiencies() int32 {
 }
 
 func (r ClassResolver) SavingThrowProficiencies() *[]string {
-	fmt.Println(r.c.SavingThrowProficiencies)
 	return &r.c.SavingThrowProficiencies
 }
 

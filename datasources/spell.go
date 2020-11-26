@@ -19,10 +19,6 @@ type Spell struct {
 	Description string
 }
 
-func (Spell) TableName() string {
-	return "Spell"
-}
-
 type SpellResolver struct {
 	s *Spell
 }
