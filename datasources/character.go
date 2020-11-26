@@ -154,7 +154,26 @@ func (r *CharacterResolver) Skills() *[]*SkillResolver {
 
 func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *CharacterResolver {
 	q := `
-		SELECT c."ID", c.name, c."maxHP", c."HP", c.str, c.dex, c.con, c.int, c.wis, c.cha, c.gp, c.sp, c.cp, c.ep, c.pp, c."raceID", c."subraceID", c."backgroundID", c."charClassID"
+	Select 
+		c."ID",
+		c.name, 
+		c."maxHP", 
+		c."HP", 
+		c.str, 
+		c.dex, 
+		c.con, 
+		c.int, 
+		c.wis, 
+		c.cha, 
+		c.gp, 
+		c.sp, 
+		c.cp, 
+		c.ep, 
+		c.pp, 
+		c."raceID", 
+		c."subraceID", 
+		c."backgroundID", 
+		c."charClassID"
 		FROM "Character" c
 		WHERE "ID" = $1
 	`
@@ -196,7 +215,26 @@ func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *Char
 
 func (r *Resolver) Characters() *[]*CharacterResolver {
 	q := `
-	Select c."ID", c.name, c."maxHP", c."HP", c.str, c.dex, c.con, c.int, c.wis, c.cha, c.gp, c.sp, c.cp, c.ep, c.pp, c."raceID", c."subraceID", c."backgroundID", c."charClassID"
+	Select 
+		c."ID",
+		c.name, 
+		c."maxHP", 
+		c."HP", 
+		c.str, 
+		c.dex, 
+		c.con, 
+		c.int, 
+		c.wis, 
+		c.cha, 
+		c.gp, 
+		c.sp, 
+		c.cp, 
+		c.ep, 
+		c.pp, 
+		c."raceID", 
+		c."subraceID", 
+		c."backgroundID", 
+		c."charClassID"
 	FROM "Character" c
 	`
 	var characters []Character
