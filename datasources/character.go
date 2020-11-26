@@ -27,7 +27,7 @@ type Character struct {
 	RaceID       int32
 	SubraceID    *int32
 	BackgroundID int32
-	// CharClassID  int32
+	CharClassID  int32
 	// UserID       int32
 	// SpecID       int32
 	// Deathsaves   string
@@ -118,6 +118,11 @@ func (r *CharacterResolver) Background(ctx context.Context) *BackgroundResolver 
 	return &BackgroundResolver{b}
 }
 
+func (r *CharacterResolver) Class(ctx context.Context) *ClassResolver {
+	c := queryClass(r.db, r.character.CharClassID)
+	return &ClassResolver{c}
+}
+
 func (r *CharacterResolver) Skills() *[]*SkillResolver {
 	var skills []*Skill
 
@@ -149,7 +154,7 @@ func (r *CharacterResolver) Skills() *[]*SkillResolver {
 
 func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *CharacterResolver {
 	q := `
-		SELECT c."ID", c.name, c."maxHP", c."HP", c.str, c.dex, c.con, c.int, c.wis, c.cha, c.gp, c.sp, c.cp, c.ep, c.pp, c."raceID", c."subraceID", c."backgroundID"
+		SELECT c."ID", c.name, c."maxHP", c."HP", c.str, c.dex, c.con, c.int, c.wis, c.cha, c.gp, c.sp, c.cp, c.ep, c.pp, c."raceID", c."subraceID", c."backgroundID", c."charClassID"
 		FROM "Character" c
 		WHERE "ID" = $1
 	`
@@ -177,6 +182,7 @@ func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *Char
 			&character.RaceID,
 			&character.SubraceID,
 			&character.BackgroundID,
+			&character.CharClassID,
 		)
 
 	if err != nil {
@@ -190,7 +196,7 @@ func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *Char
 
 func (r *Resolver) Characters() *[]*CharacterResolver {
 	q := `
-	Select c."ID", c.name, c."maxHP", c."HP", c.str, c.dex, c.con, c.int, c.wis, c.cha, c.gp, c.sp, c.cp, c.ep, c.pp, c."raceID", c."subraceID"
+	Select c."ID", c.name, c."maxHP", c."HP", c.str, c.dex, c.con, c.int, c.wis, c.cha, c.gp, c.sp, c.cp, c.ep, c.pp, c."raceID", c."subraceID", c."backgroundID", c."charClassID"
 	FROM "Character" c
 	`
 	var characters []Character
@@ -221,6 +227,8 @@ func (r *Resolver) Characters() *[]*CharacterResolver {
 				&character.Pp,
 				&character.RaceID,
 				&character.SubraceID,
+				&character.BackgroundID,
+				&character.CharClassID,
 			)
 
 		if err != nil {

@@ -37,6 +37,13 @@ type Character {
 	subrace: Subrace
 	skills: [Skill]
 	background: Background
+	class: Class!
+	# abilityScores: AbilityScores!
+	# weapons:
+	# armor:
+	# adventuringGear
+	# customItems:
+	# tools:
 	str: Int
 	dex: Int
 	con: Int
@@ -44,9 +51,11 @@ type Character {
 	wis: Int
 	cha: Int
 	HP: Int
+	# maxHP: Int!
 	gp: Int
 	sp: Int
 	cp: Int
+	# deathsaves: Deathsaves
 }
 
 type Race {

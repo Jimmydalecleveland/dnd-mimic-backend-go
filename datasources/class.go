@@ -2,6 +2,7 @@ package datasources
 
 import (
 	"context"
+	"database/sql"
 	"log"
 
 	"github.com/graph-gophers/graphql-go"
@@ -40,13 +41,13 @@ func (r ClassResolver) SavingThrowProficiencies() *[]string {
 	return &r.c.SavingThrowProficiencies
 }
 
-func (r *Resolver) Class(ctx context.Context, args struct{ ID int32 }) *ClassResolver {
+func queryClass(db *sql.DB, id int32) Class {
 	var c Class
 	q := `
 		SELECT * FROM "CharClass"
 		WHERE "ID" = $1
 	`
-	err := r.DB.QueryRow(q, args.ID).Scan(
+	err := db.QueryRow(q, id).Scan(
 		&c.ID,
 		&c.Name,
 		&c.HitDice,
@@ -57,6 +58,11 @@ func (r *Resolver) Class(ctx context.Context, args struct{ ID int32 }) *ClassRes
 		log.Fatal(err)
 	}
 
+	return c
+}
+
+func (r *Resolver) Class(ctx context.Context, args struct{ ID int32 }) *ClassResolver {
+	c := queryClass(r.DB, args.ID)
 	return &ClassResolver{c}
 }
 
