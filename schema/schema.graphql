@@ -55,7 +55,7 @@ type Character {
 	gp: Int
 	sp: Int
 	cp: Int
-	# deathsaves: Deathsaves
+	deathsaves: Deathsaves!
 }
 
 type Race {
@@ -83,4 +83,9 @@ type Class {
 	hitDice: String!
 	numSkillProficiencies: Int!
 	savingThrowProficiencies: [String!]
+}
+
+type Deathsaves {
+  successes: Int!
+  failures: Int!
 }

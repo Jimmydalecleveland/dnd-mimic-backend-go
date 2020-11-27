@@ -28,18 +28,23 @@ type Character struct {
 	SubraceID    *int32
 	BackgroundID int32
 	CharClassID  int32
+	DeathSaves   DeathSaves
 	// UserID       int32
 	// SpecID       int32
-	// Deathsaves   string
 }
 
-func (Character) TableName() string {
-	return "Character"
+type DeathSaves struct {
+	Successes int32
+	Failures  int32
 }
 
 type CharacterResolver struct {
 	character Character
 	db        *sql.DB
+}
+
+type DeathSavesResolver struct {
+	d DeathSaves
 }
 
 func (r *CharacterResolver) ID() graphql.ID {
@@ -97,6 +102,18 @@ func (r *CharacterResolver) Sp() *int32 {
 
 func (r *CharacterResolver) Cp() *int32 {
 	return &r.character.Cp
+}
+
+func (r *CharacterResolver) DeathSaves() *DeathSavesResolver {
+	return &DeathSavesResolver{d: r.character.DeathSaves}
+}
+
+func (r *DeathSavesResolver) Successes() int32 {
+	return r.d.Successes
+}
+
+func (r *DeathSavesResolver) Failures() int32 {
+	return r.d.Failures
 }
 
 func (r *CharacterResolver) Race(ctx context.Context) *RaceResolver {
@@ -176,6 +193,8 @@ func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *Char
 		c.cp, 
 		c.ep, 
 		c.pp, 
+		c."deathSaveSuccesses",
+		c."deathSaveFailures",
 		c."raceID", 
 		c."subraceID", 
 		c."backgroundID", 
@@ -204,6 +223,8 @@ func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *Char
 			&character.Cp,
 			&character.Ep,
 			&character.Pp,
+			&character.DeathSaves.Successes,
+			&character.DeathSaves.Failures,
 			&character.RaceID,
 			&character.SubraceID,
 			&character.BackgroundID,
@@ -237,6 +258,8 @@ func (r *Resolver) Characters() *[]*CharacterResolver {
 		c.cp, 
 		c.ep, 
 		c.pp, 
+		c."deathSaveSuccesses",
+		c."deathSaveFailures",
 		c."raceID", 
 		c."subraceID", 
 		c."backgroundID", 
@@ -269,6 +292,8 @@ func (r *Resolver) Characters() *[]*CharacterResolver {
 				&character.Cp,
 				&character.Ep,
 				&character.Pp,
+				&character.DeathSaves.Successes,
+				&character.DeathSaves.Failures,
 				&character.RaceID,
 				&character.SubraceID,
 				&character.BackgroundID,
