@@ -100,7 +100,10 @@ func (r *CharacterResolver) Cp() *int32 {
 }
 
 func (r *CharacterResolver) Race(ctx context.Context) *RaceResolver {
-	race := queryRace(r.db, r.character.RaceID)
+	race, err := queryRace(r.db, r.character.RaceID)
+	if err != nil {
+		return nil
+	}
 	subraces := querySubraces(r.db, r.character.RaceID)
 	return &RaceResolver{r: race, s: subraces}
 }
@@ -109,7 +112,10 @@ func (r *CharacterResolver) Subrace(ctx context.Context) *RaceResolver {
 	if r.character.SubraceID == nil {
 		return nil
 	}
-	subrace := queryRace(r.db, *r.character.SubraceID)
+	subrace, err := querySubrace(r.db, *r.character.SubraceID)
+	if err != nil {
+		return nil
+	}
 	return &RaceResolver{r: subrace}
 }
 

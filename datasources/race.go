@@ -16,7 +16,7 @@ type Race struct {
 }
 
 type RaceResolver struct {
-	r Race
+	r *Race
 	s []Race
 }
 
@@ -49,15 +49,34 @@ func (r *SubraceResolver) Name() string {
 	return r.s.Name
 }
 
-func queryRace(db *sql.DB, id int32) Race {
-	q := `Select "Race"."ID", "Race".name FROM "Race" WHERE "ID" = $1`
+func queryRace(db *sql.DB, id int32) (*Race, error) {
+	q := `
+		Select "ID", name FROM "Race" 
+		WHERE "ID" = $1
+		AND "parentRaceID" IS NULL
+	`
 	var race Race
 	err := db.QueryRow(q, id).Scan(&race.ID, &race.Name)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	return race
+	return &race, nil
+}
+
+func querySubrace(db *sql.DB, id int32) (*Race, error) {
+	q := `
+		Select "ID", name FROM "Race" 
+		WHERE "ID" = $1
+		AND "parentRaceID" IS NOT NULL
+	`
+	var race Race
+	err := db.QueryRow(q, id).Scan(&race.ID, &race.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	return &race, nil
 }
 
 func querySubraces(db *sql.DB, id int32) []Race {
@@ -89,15 +108,21 @@ func querySubraces(db *sql.DB, id int32) []Race {
 }
 
 func (r *Resolver) Race(ctx context.Context, args struct{ ID int32 }) *RaceResolver {
-	race := queryRace(r.DB, args.ID)
+	race, err := queryRace(r.DB, args.ID)
+	if err != nil {
+		return nil
+	}
 	subraces := querySubraces(r.DB, args.ID)
 
 	return &RaceResolver{r: race, s: subraces}
 }
 
 func (r *Resolver) Races() *[]*RaceResolver {
-	q := `SELECT * FROM "Race"`
-	var races []Race
+	q := `
+		SELECT * FROM "Race"
+		WHERE "parentRaceID" IS NULL
+	`
+	var races []*Race
 
 	rows, err := r.DB.Query(q)
 	if err != nil {
@@ -116,7 +141,7 @@ func (r *Resolver) Races() *[]*RaceResolver {
 			log.Fatal(err)
 		}
 
-		races = append(races, race)
+		races = append(races, &race)
 	}
 
 	var xRaceResolver []*RaceResolver
