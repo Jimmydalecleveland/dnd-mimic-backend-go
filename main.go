@@ -27,7 +27,8 @@ func main() {
 	}
 
 	// Setup GraphQL with schema cast to string and db instance
-	schema := graphql.MustParseSchema(string(schemaToString), &datasources.Resolver{DB: db})
+	opts := []graphql.SchemaOpt{graphql.UseFieldResolvers()}
+	schema := graphql.MustParseSchema(string(schemaToString), &datasources.Resolver{DB: db}, opts...)
 	http.Handle("/query", &relay.Handler{Schema: schema})
 
 	// Setup graphiql

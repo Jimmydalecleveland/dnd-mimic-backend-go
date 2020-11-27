@@ -7,31 +7,13 @@ import (
 )
 
 type Weapon struct {
-	ItemID    int32
+	ID        graphql.ID
 	Damage    *string
 	SkillType string
 	RangeType string
 }
 
-type WeaponResolver struct {
-	w *Weapon
-}
-
-func (r *WeaponResolver) ID() graphql.ID {
-	return Int32ToGraphqlID(r.w.ItemID)
-}
-
-func (r *WeaponResolver) Damage() *string {
-	return r.w.Damage
-}
-func (r *WeaponResolver) SkillType() string {
-	return r.w.SkillType
-}
-func (r *WeaponResolver) RangeType() string {
-	return r.w.RangeType
-}
-
-func (r *Resolver) Weapons() *[]*WeaponResolver {
+func (r *Resolver) Weapons() *[]*Weapon {
 	q := `
 		SELECT * FROM "Weapon"
 	`
@@ -43,8 +25,9 @@ func (r *Resolver) Weapons() *[]*WeaponResolver {
 	var weapons []*Weapon
 	for rows.Next() {
 		var weapon Weapon
+		var tempID int32
 		err = rows.Scan(
-			&weapon.ItemID,
+			&tempID,
 			&weapon.Damage,
 			&weapon.SkillType,
 			&weapon.RangeType,
@@ -52,13 +35,9 @@ func (r *Resolver) Weapons() *[]*WeaponResolver {
 		if err != nil {
 			log.Fatal(err)
 		}
+		weapon.ID = Int32ToGraphqlID(tempID)
 		weapons = append(weapons, &weapon)
 	}
 
-	var xWeaponResolver []*WeaponResolver
-	for _, w := range weapons {
-		xWeaponResolver = append(xWeaponResolver, &WeaponResolver{w})
-	}
-
-	return &xWeaponResolver
+	return &weapons
 }
