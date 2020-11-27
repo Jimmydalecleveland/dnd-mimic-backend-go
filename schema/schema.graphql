@@ -10,6 +10,7 @@ type Query {
 	backgrounds: [Background!]
 	class(ID: ID!): Class
 	classes: [Class!]
+	weapons: [Weapon!]
 }
 
 type Spell {
@@ -88,4 +89,11 @@ type Class {
 type Deathsaves {
   successes: Int!
   failures: Int!
+}
+
+type Weapon {
+	ID: ID!
+	damage: String
+	skillType: String!
+	rangeType: String!
 }
