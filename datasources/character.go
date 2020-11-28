@@ -8,15 +8,6 @@ import (
 	graphql "github.com/graph-gophers/graphql-go"
 )
 
-type AbilityScores struct {
-	Str int32
-	Dex int32
-	Con int32
-	Int int32
-	Wis int32
-	Cha int32
-}
-
 type Character struct {
 	ID           int32
 	Name         string
@@ -31,7 +22,7 @@ type Character struct {
 	SubraceID    *int32
 	BackgroundID int32
 	CharClassID  int32
-	DeathSaves   DeathSaves
+	DeathSaves
 	AbilityScores
 	// UserID       int32
 	// SpecID       int32
@@ -42,13 +33,18 @@ type DeathSaves struct {
 	Failures  int32
 }
 
+type AbilityScores struct {
+	Str int32
+	Dex int32
+	Con int32
+	Int int32
+	Wis int32
+	Cha int32
+}
+
 type CharacterResolver struct {
 	character Character
 	db        *sql.DB
-}
-
-type DeathSavesResolver struct {
-	d DeathSaves
 }
 
 func (r *CharacterResolver) ID() graphql.ID {
@@ -88,16 +84,8 @@ func (r *CharacterResolver) Cp() *int32 {
 	return &r.character.Cp
 }
 
-func (r *CharacterResolver) DeathSaves() *DeathSavesResolver {
-	return &DeathSavesResolver{d: r.character.DeathSaves}
-}
-
-func (r *DeathSavesResolver) Successes() int32 {
-	return r.d.Successes
-}
-
-func (r *DeathSavesResolver) Failures() int32 {
-	return r.d.Failures
+func (r *CharacterResolver) DeathSaves() DeathSaves {
+	return r.character.DeathSaves
 }
 
 func (r *CharacterResolver) Race(ctx context.Context) *RaceResolver {
@@ -277,12 +265,12 @@ func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *Char
 			&character.Name,
 			&character.MaxHP,
 			&character.HP,
-			&character.Str,
-			&character.Dex,
-			&character.Con,
-			&character.Int,
-			&character.Wis,
-			&character.Cha,
+			&character.AbilityScores.Str,
+			&character.AbilityScores.Dex,
+			&character.AbilityScores.Con,
+			&character.AbilityScores.Int,
+			&character.AbilityScores.Wis,
+			&character.AbilityScores.Cha,
 			&character.Gp,
 			&character.Sp,
 			&character.Cp,
@@ -346,12 +334,12 @@ func (r *Resolver) Characters() *[]*CharacterResolver {
 				&character.Name,
 				&character.MaxHP,
 				&character.HP,
-				&character.Str,
-				&character.Dex,
-				&character.Con,
-				&character.Int,
-				&character.Wis,
-				&character.Cha,
+				&character.AbilityScores.Str,
+				&character.AbilityScores.Dex,
+				&character.AbilityScores.Con,
+				&character.AbilityScores.Int,
+				&character.AbilityScores.Wis,
+				&character.AbilityScores.Cha,
 				&character.Gp,
 				&character.Sp,
 				&character.Cp,
