@@ -10,6 +10,7 @@ import (
 type Armor struct {
 	ID                    graphql.ID
 	Name                  string
+	Type                  string
 	Ac                    int32
 	IsDexAdded            bool
 	DisadvantageOnStealth bool
@@ -23,15 +24,12 @@ type QuantifiedArmor struct {
 	Quantity int32
 }
 
-func (r *QuantifiedArmor) ToQuantifiedArmor() (*QuantifiedArmor, bool) {
-	return r, true
-}
-
 func (r *Resolver) Armor(ctx context.Context, args struct{ ID int32 }) *Armor {
 	q := `
 		SELECT 
 			i."ID", 
 			i.name, 
+			i.type,
 			a.ac, 
 			a."isDexAdded", 
 			a."disadvantageOnStealth", 
@@ -47,6 +45,7 @@ func (r *Resolver) Armor(ctx context.Context, args struct{ ID int32 }) *Armor {
 	err := r.DB.QueryRow(q, args.ID).Scan(
 		&tempID,
 		&armor.Name,
+		&armor.Type,
 		&armor.Ac,
 		&armor.IsDexAdded,
 		&armor.DisadvantageOnStealth,
@@ -68,6 +67,7 @@ func (r *Resolver) Armors() *[]*Armor {
 		SELECT 
 			i."ID", 
 			i.name, 
+			i.type,
 			a.ac, 
 			a."isDexAdded", 
 			a."disadvantageOnStealth", 
@@ -75,7 +75,7 @@ func (r *Resolver) Armors() *[]*Armor {
 			i.cost, 
 			i.weight 
 		FROM "Armor" a
-		JOIN "Item" i ON i."ID" = w."itemID"
+		JOIN "Item" i ON i."ID" = a."itemID"
 	`
 	rows, err := r.DB.Query(q)
 	if err != nil {
@@ -89,14 +89,11 @@ func (r *Resolver) Armors() *[]*Armor {
 		err = rows.Scan(
 			&tempID,
 			&armor.Name,
-			&tempID,
-			&armor.Name,
+			&armor.Type,
 			&armor.Ac,
 			&armor.IsDexAdded,
 			&armor.DisadvantageOnStealth,
 			&armor.MaxDex,
-			&armor.Cost,
-			&armor.Weight,
 			&armor.Cost,
 			&armor.Weight,
 		)

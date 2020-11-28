@@ -10,6 +10,7 @@ import (
 type Weapon struct {
 	ID        graphql.ID
 	Name      string
+	Type      string
 	Damage    *string
 	SkillType string
 	RangeType string
@@ -28,7 +29,16 @@ func (r *QuantifiedWeapon) ToQuantifiedWeapon() (*QuantifiedWeapon, bool) {
 
 func (r *Resolver) Weapon(ctx context.Context, args struct{ ID int32 }) *Weapon {
 	q := `
-	SELECT i."ID", i.name, w.damage, w."skillType", w."rangeType", i.cost, i.weight FROM "Weapon" w
+	SELECT 
+		i."ID", 
+		i.name, 
+		i.type,
+		w.damage, 
+		w."skillType", 
+		w."rangeType", 
+		i.cost, 
+		i.weight 
+	FROM "Weapon" w
 	JOIN "Item" i ON i."ID" = w."itemID"
 	WHERE i."ID" = $1
  `
@@ -37,6 +47,7 @@ func (r *Resolver) Weapon(ctx context.Context, args struct{ ID int32 }) *Weapon 
 	err := r.DB.QueryRow(q, args.ID).Scan(
 		&tempID,
 		&weapon.Name,
+		&weapon.Type,
 		&weapon.Damage,
 		&weapon.SkillType,
 		&weapon.RangeType,
@@ -54,7 +65,16 @@ func (r *Resolver) Weapon(ctx context.Context, args struct{ ID int32 }) *Weapon 
 
 func (r *Resolver) Weapons() *[]*Weapon {
 	q := `
-		SELECT i."ID", i.name, w.damage, w."skillType", w."rangeType", i.cost, i.weight FROM "Weapon" w
+		SELECT 
+			i."ID", 
+			i.name, 
+			i.type,
+			w.damage, 
+			w."skillType", 
+			w."rangeType", 
+			i.cost, 
+			i.weight 
+		FROM "Weapon" w
 		JOIN "Item" i ON i."ID" = w."itemID"
 	`
 	rows, err := r.DB.Query(q)
@@ -69,6 +89,7 @@ func (r *Resolver) Weapons() *[]*Weapon {
 		err = rows.Scan(
 			&tempID,
 			&weapon.Name,
+			&weapon.Type,
 			&weapon.Damage,
 			&weapon.SkillType,
 			&weapon.RangeType,

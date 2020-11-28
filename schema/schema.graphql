@@ -12,6 +12,8 @@ type Query {
 	classes: [Class!]
 	weapons: [Weapon!]
 	weapon(ID: ID!): Weapon
+	armors: [Armor!]
+	adventuringGears: [AdventuringGear!]
 }
 
 type Spell {
@@ -94,11 +96,26 @@ type Deathsaves {
   failures: Int!
 }
 
+"""
+Items
+"""
+
 union Item = QuantifiedWeapon | QuantifiedArmor
+
+# This implementation of GraphQL is dumb and expects resolvers
+# for an interface
+# interface Item {
+#   ID: ID!
+#   name: String!
+#   type: String!
+#   cost: String
+#   weight: String
+# }
 
 type Weapon {
 	ID: ID!
 	name: String!
+  type: String!
 	damage: String
 	skillType: String!
 	rangeType: String!
@@ -106,9 +123,10 @@ type Weapon {
 	weight: String
 }
 
-type QuantifiedWeapon implements {
+type QuantifiedWeapon {
 	ID: ID!
 	name: String!
+  type: String!
 	damage: String
 	skillType: String!
 	rangeType: String!
@@ -120,6 +138,7 @@ type QuantifiedWeapon implements {
 type Armor {
 	ID: ID!
 	name: String!
+  type: String!
 	ac: Int!
 	isDexAdded: Boolean!
 	maxDex: Int
@@ -128,9 +147,10 @@ type Armor {
 	weight: String
 }
 
-type QuantifiedArmor implements {
+type QuantifiedArmor {
 	ID: ID!
 	name: String!
+  type: String!
 	ac: Int!
 	isDexAdded: Boolean!
 	maxDex: Int
@@ -138,4 +158,27 @@ type QuantifiedArmor implements {
 	cost: String
 	weight: String
 	quantity: Int!
+}
+
+type AdventuringGear {
+  ID: ID!
+  name: String!
+  type: String!
+  description: String
+  category: String
+  categoryDescription: String
+  cost: String
+  weight: String
+}
+
+type QuantifiedAdventuringGear {
+  ID: ID!
+  name: String!
+  type: String!
+  category: String
+  categoryDescription: String
+  description: String
+  cost: String
+  weight: String
+  quantity: Int!
 }
