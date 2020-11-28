@@ -35,30 +35,31 @@ type Skill {
 type Character {
 	ID: ID!
 	name: String
+	HP: Int
+	maxHP: Int!
+	abilityScores: AbilityScores!
+	gp: Int
+	sp: Int
+	cp: Int
 	race: Race!
 	subrace: Subrace
 	skills: [Skill]
 	background: Background
 	class: Class!
-	# abilityScores: AbilityScores!
-	# weapons:
-	# armor:
 	# adventuringGear
 	# customItems:
 	# tools:
-	str: Int
-	dex: Int
-	con: Int
-	int: Int
-	wis: Int
-	cha: Int
-	HP: Int
-	# maxHP: Int!
-	gp: Int
-	sp: Int
-	cp: Int
 	deathsaves: Deathsaves!
 	inventory: [Item!]
+}
+
+type AbilityScores {
+  str: Int!
+  dex: Int!
+  con: Int!
+  int: Int!
+  wis: Int!
+  cha: Int!
 }
 
 type Race {

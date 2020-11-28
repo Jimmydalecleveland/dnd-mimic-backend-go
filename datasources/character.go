@@ -8,17 +8,20 @@ import (
 	graphql "github.com/graph-gophers/graphql-go"
 )
 
+type AbilityScores struct {
+	Str int32
+	Dex int32
+	Con int32
+	Int int32
+	Wis int32
+	Cha int32
+}
+
 type Character struct {
 	ID           int32
 	Name         string
 	MaxHP        int32
 	HP           int32
-	Str          int32
-	Dex          int32
-	Con          int32
-	Int          int32
-	Wis          int32
-	Cha          int32
 	Gp           int32
 	Sp           int32
 	Cp           int32
@@ -29,6 +32,7 @@ type Character struct {
 	BackgroundID int32
 	CharClassID  int32
 	DeathSaves   DeathSaves
+	AbilityScores
 	// UserID       int32
 	// SpecID       int32
 }
@@ -60,36 +64,16 @@ func (r *CharacterResolver) Name() *string {
 	return &name
 }
 
-func (r *CharacterResolver) MaxHP() *int32 {
-	return &r.character.MaxHP
+func (r *CharacterResolver) MaxHP() int32 {
+	return r.character.MaxHP
 }
 
 func (r *CharacterResolver) HP() *int32 {
 	return &r.character.HP
 }
 
-func (r *CharacterResolver) Str() *int32 {
-	return &r.character.Str
-}
-
-func (r *CharacterResolver) Dex() *int32 {
-	return &r.character.Dex
-}
-
-func (r *CharacterResolver) Con() *int32 {
-	return &r.character.Con
-}
-
-func (r *CharacterResolver) Int() *int32 {
-	return &r.character.Int
-}
-
-func (r *CharacterResolver) Wis() *int32 {
-	return &r.character.Wis
-}
-
-func (r *CharacterResolver) Cha() *int32 {
-	return &r.character.Cha
+func (r *CharacterResolver) AbilityScores() AbilityScores {
+	return r.character.AbilityScores
 }
 
 func (r *CharacterResolver) Gp() *int32 {
