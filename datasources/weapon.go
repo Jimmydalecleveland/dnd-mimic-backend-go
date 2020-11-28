@@ -10,7 +10,7 @@ import (
 type Weapon struct {
 	ID        graphql.ID
 	Name      string
-	Type      string
+	ItemType  string
 	Damage    *string
 	SkillType string
 	RangeType string
@@ -47,7 +47,7 @@ func (r *Resolver) Weapon(ctx context.Context, args struct{ ID int32 }) *Weapon 
 	err := r.DB.QueryRow(q, args.ID).Scan(
 		&tempID,
 		&weapon.Name,
-		&weapon.Type,
+		&weapon.ItemType,
 		&weapon.Damage,
 		&weapon.SkillType,
 		&weapon.RangeType,
@@ -89,7 +89,7 @@ func (r *Resolver) Weapons() *[]*Weapon {
 		err = rows.Scan(
 			&tempID,
 			&weapon.Name,
-			&weapon.Type,
+			&weapon.ItemType,
 			&weapon.Damage,
 			&weapon.SkillType,
 			&weapon.RangeType,

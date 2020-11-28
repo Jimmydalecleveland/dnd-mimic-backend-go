@@ -10,7 +10,7 @@ import (
 type Armor struct {
 	ID                    graphql.ID
 	Name                  string
-	Type                  string
+	ItemType              string
 	Ac                    int32
 	IsDexAdded            bool
 	DisadvantageOnStealth bool
@@ -45,7 +45,7 @@ func (r *Resolver) Armor(ctx context.Context, args struct{ ID int32 }) *Armor {
 	err := r.DB.QueryRow(q, args.ID).Scan(
 		&tempID,
 		&armor.Name,
-		&armor.Type,
+		&armor.ItemType,
 		&armor.Ac,
 		&armor.IsDexAdded,
 		&armor.DisadvantageOnStealth,
@@ -89,7 +89,7 @@ func (r *Resolver) Armors() *[]*Armor {
 		err = rows.Scan(
 			&tempID,
 			&armor.Name,
-			&armor.Type,
+			&armor.ItemType,
 			&armor.Ac,
 			&armor.IsDexAdded,
 			&armor.DisadvantageOnStealth,

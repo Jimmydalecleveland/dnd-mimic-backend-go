@@ -10,7 +10,7 @@ import (
 type AdventuringGear struct {
 	ID                  graphql.ID
 	Name                string
-	Type                string
+	ItemType            string
 	Description         *string
 	Category            *string
 	CategoryDescription *string
@@ -43,7 +43,7 @@ func (r *Resolver) AdventuringGear(ctx context.Context, args struct{ ID int32 })
 	err := r.DB.QueryRow(q, args.ID).Scan(
 		&tempID,
 		&adventuringGear.Name,
-		&adventuringGear.Type,
+		&adventuringGear.ItemType,
 		&adventuringGear.Description,
 		&adventuringGear.Category,
 		&adventuringGear.CategoryDescription,
@@ -85,7 +85,7 @@ func (r *Resolver) AdventuringGears() *[]*AdventuringGear {
 		err = rows.Scan(
 			&tempID,
 			&adventuringGear.Name,
-			&adventuringGear.Type,
+			&adventuringGear.ItemType,
 			&adventuringGear.Description,
 			&adventuringGear.Category,
 			&adventuringGear.CategoryDescription,
