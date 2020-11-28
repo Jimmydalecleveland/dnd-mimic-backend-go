@@ -58,7 +58,7 @@ type Character {
 	sp: Int
 	cp: Int
 	deathsaves: Deathsaves!
-	inventory: [QuantifiedWeapon!]
+	inventory: [Item!]
 }
 
 type Race {
@@ -93,7 +93,7 @@ type Deathsaves {
   failures: Int!
 }
 
-# union Item = Weapon
+union Item = QuantifiedWeapon
 
 type Weapon {
 	ID: ID!

@@ -22,6 +22,10 @@ type QuantifiedWeapon struct {
 	Quantity int32
 }
 
+func (r *QuantifiedWeapon) ToQuantifiedWeapon() (*QuantifiedWeapon, bool) {
+	return r, true
+}
+
 func (r *Resolver) Weapon(ctx context.Context, args struct{ ID int32 }) *Weapon {
 	q := `
 	SELECT i."ID", i.name, w.damage, w."skillType", w."rangeType", i.cost, i.weight FROM "Weapon" w
