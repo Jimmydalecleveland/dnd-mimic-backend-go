@@ -11,6 +11,7 @@ type Query {
 	class(ID: ID!): Class
 	classes: [Class!]
 	weapons: [Weapon!]
+	weapon(ID: ID!): Weapon
 }
 
 type Spell {
@@ -93,7 +94,10 @@ type Deathsaves {
 
 type Weapon {
 	ID: ID!
+	name: String!
 	damage: String
 	skillType: String!
 	rangeType: String!
+	cost: String
+	weight: String
 }
