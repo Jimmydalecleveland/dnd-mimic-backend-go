@@ -17,6 +17,11 @@ type Weapon struct {
 	Weight    *string
 }
 
+type QuantifiedWeapon struct {
+	Weapon
+	Quantity int32
+}
+
 func (r *Resolver) Weapon(ctx context.Context, args struct{ ID int32 }) *Weapon {
 	q := `
 	SELECT i."ID", i.name, w.damage, w."skillType", w."rangeType", i.cost, i.weight FROM "Weapon" w

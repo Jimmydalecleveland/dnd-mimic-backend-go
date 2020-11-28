@@ -58,6 +58,7 @@ type Character {
 	sp: Int
 	cp: Int
 	deathsaves: Deathsaves!
+	inventory: [QuantifiedWeapon!]
 }
 
 type Race {
@@ -92,6 +93,8 @@ type Deathsaves {
   failures: Int!
 }
 
+# union Item = Weapon
+
 type Weapon {
 	ID: ID!
 	name: String!
@@ -100,4 +103,15 @@ type Weapon {
 	rangeType: String!
 	cost: String
 	weight: String
+}
+
+type QuantifiedWeapon implements {
+	ID: ID!
+	name: String!
+	damage: String
+	skillType: String!
+	rangeType: String!
+	cost: String
+	weight: String
+	quantity: Int!
 }

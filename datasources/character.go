@@ -175,6 +175,43 @@ func (r *CharacterResolver) Skills() *[]*SkillResolver {
 	return &xSkillResolver
 }
 
+func (r *CharacterResolver) Inventory() *[]*QuantifiedWeapon {
+	q := `
+		SELECT i."ID", i.name, w.damage, w."skillType", w."rangeType", i.cost, i.weight, ci.quantity FROM "Weapon" w
+		JOIN "Item" i ON i."ID" = w."itemID"
+		JOIN "CharacterItem" ci ON ci."itemID" = i."ID"
+		WHERE ci."characterID" = $1
+	`
+
+	rows, err := r.db.Query(q, r.character.ID)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var weapons []*QuantifiedWeapon
+	for rows.Next() {
+		var weapon QuantifiedWeapon
+		var tempID int32
+		err = rows.Scan(
+			&tempID,
+			&weapon.Name,
+			&weapon.Damage,
+			&weapon.SkillType,
+			&weapon.RangeType,
+			&weapon.Cost,
+			&weapon.Weight,
+			&weapon.Quantity,
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		weapon.ID = Int32ToGraphqlID(tempID)
+		weapons = append(weapons, &weapon)
+	}
+
+	return &weapons
+}
+
 func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *CharacterResolver {
 	q := `
 	Select 
