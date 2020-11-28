@@ -93,7 +93,7 @@ type Deathsaves {
   failures: Int!
 }
 
-union Item = QuantifiedWeapon
+union Item = QuantifiedWeapon | QuantifiedArmor
 
 type Weapon {
 	ID: ID!
@@ -111,6 +111,29 @@ type QuantifiedWeapon implements {
 	damage: String
 	skillType: String!
 	rangeType: String!
+	cost: String
+	weight: String
+	quantity: Int!
+}
+
+type Armor {
+	ID: ID!
+	name: String!
+	ac: Int!
+	isDexAdded: Boolean!
+	maxDex: Int
+	disadvantageOnStealth: Boolean!
+	cost: String
+	weight: String
+}
+
+type QuantifiedArmor implements {
+	ID: ID!
+	name: String!
+	ac: Int!
+	isDexAdded: Boolean!
+	maxDex: Int
+	disadvantageOnStealth: Boolean!
 	cost: String
 	weight: String
 	quantity: Int!

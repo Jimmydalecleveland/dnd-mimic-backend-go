@@ -175,20 +175,21 @@ func (r *CharacterResolver) Skills() *[]*SkillResolver {
 	return &xSkillResolver
 }
 
-func (r *CharacterResolver) Inventory() *[]*QuantifiedWeapon {
-	q := `
+func (r *CharacterResolver) Inventory() *[]*ItemResolver {
+	var xItemResolver []*ItemResolver
+
+	qw := `
 		SELECT i."ID", i.name, w.damage, w."skillType", w."rangeType", i.cost, i.weight, ci.quantity FROM "Weapon" w
 		JOIN "Item" i ON i."ID" = w."itemID"
 		JOIN "CharacterItem" ci ON ci."itemID" = i."ID"
 		WHERE ci."characterID" = $1
 	`
 
-	rows, err := r.db.Query(q, r.character.ID)
+	rows, err := r.db.Query(qw, r.character.ID)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	var weapons []*QuantifiedWeapon
 	for rows.Next() {
 		var weapon QuantifiedWeapon
 		var tempID int32
@@ -206,10 +207,53 @@ func (r *CharacterResolver) Inventory() *[]*QuantifiedWeapon {
 			log.Fatal(err)
 		}
 		weapon.ID = Int32ToGraphqlID(tempID)
-		weapons = append(weapons, &weapon)
+		xItemResolver = append(xItemResolver, &ItemResolver{&weapon})
 	}
 
-	return &weapons
+	qa := `
+		SELECT 
+			i."ID", 
+			i.name, 
+			a.ac, 
+			a."isDexAdded", 
+			a."disadvantageOnStealth", 
+			a."maxDex",
+			i.cost, 
+			i.weight, 
+			ci.quantity 
+		FROM "Armor" a
+		JOIN "Item" i ON i."ID" = a."itemID"
+		JOIN "CharacterItem" ci ON ci."itemID" = i."ID"
+		WHERE ci."characterID" = $1
+	`
+
+	rows, err = r.db.Query(qa, r.character.ID)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for rows.Next() {
+		var armor QuantifiedArmor
+		var tempID int32
+		err = rows.Scan(
+			&tempID,
+			&armor.Name,
+			&armor.Ac,
+			&armor.IsDexAdded,
+			&armor.DisadvantageOnStealth,
+			&armor.MaxDex,
+			&armor.Cost,
+			&armor.Weight,
+			&armor.Quantity,
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		armor.ID = Int32ToGraphqlID(tempID)
+		xItemResolver = append(xItemResolver, &ItemResolver{&armor})
+	}
+
+	return &xItemResolver
 }
 
 func (r *Resolver) Character(ctx context.Context, args struct{ ID int32 }) *CharacterResolver {
