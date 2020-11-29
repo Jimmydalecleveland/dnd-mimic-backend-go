@@ -100,7 +100,7 @@ type Deathsaves {
 Items
 """
 
-union Item = QuantifiedWeapon | QuantifiedArmor
+union Item = QuantifiedWeapon | QuantifiedArmor | QuantifiedAdventuringGear
 
 # This implementation of GraphQL is dumb and expects resolvers
 # for an interface

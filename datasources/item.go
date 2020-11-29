@@ -14,7 +14,7 @@ func (r *ItemResolver) ToQuantifiedArmor() (*QuantifiedArmor, bool) {
 	return res, ok
 }
 
-func (r *ItemResolver) ToQuantifiedAdventuringGear() (*AdventuringGear, bool) {
-	res, ok := r.result.(*AdventuringGear)
+func (r *ItemResolver) ToQuantifiedAdventuringGear() (*QuantifiedAdventuringGear, bool) {
+	res, ok := r.result.(*QuantifiedAdventuringGear)
 	return res, ok
 }

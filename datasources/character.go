@@ -225,6 +225,49 @@ func (r *CharacterResolver) Inventory() *[]*ItemResolver {
 		xItemResolver = append(xItemResolver, &ItemResolver{&armor})
 	}
 
+	qag := `
+		SELECT 
+			i."ID", 
+			i.name, 
+			i.type,
+			a.description, 
+			a.category, 
+			a."categoryDescription", 
+			i.cost, 
+			i.weight, 
+			ci.quantity 
+		FROM "AdventuringGear" a
+		JOIN "Item" i ON i."ID" = a."itemID"
+		JOIN "CharacterItem" ci ON ci."itemID" = i."ID"
+		WHERE ci."characterID" = $1
+	`
+
+	rows, err = r.db.Query(qag, r.character.ID)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for rows.Next() {
+		var adventuringGear QuantifiedAdventuringGear
+		var tempID int32
+		err = rows.Scan(
+			&tempID,
+			&adventuringGear.Name,
+			&adventuringGear.ItemType,
+			&adventuringGear.Description,
+			&adventuringGear.Category,
+			&adventuringGear.CategoryDescription,
+			&adventuringGear.Cost,
+			&adventuringGear.Weight,
+			&adventuringGear.Quantity,
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		adventuringGear.ID = Int32ToGraphqlID(tempID)
+		xItemResolver = append(xItemResolver, &ItemResolver{&adventuringGear})
+	}
+
 	return &xItemResolver
 }
 
