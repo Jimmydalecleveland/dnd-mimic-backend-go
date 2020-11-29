@@ -12,7 +12,9 @@ type Query {
 	classes: [Class!]
 	weapons: [Weapon!]
 	weapon(ID: ID!): Weapon
+	armor(ID: ID!): Armor
 	armors: [Armor!]
+	adventuringGear(ID: ID!): AdventuringGear
 	adventuringGears: [AdventuringGear!]
 }
 
