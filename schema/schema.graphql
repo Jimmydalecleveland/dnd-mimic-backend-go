@@ -1,6 +1,7 @@
 type Query {
 	spell(ID: ID!): Spell
 	spells: [Spell!]
+	skill(ID: ID!): Skill
 	skills: [Skill!]
 	character(ID: ID!): Character
 	characters: [Character!]
@@ -10,8 +11,8 @@ type Query {
 	backgrounds: [Background!]
 	class(ID: ID!): Class
 	classes: [Class!]
-	weapons: [Weapon!]
 	weapon(ID: ID!): Weapon
+	weapons: [Weapon!]
 	armor(ID: ID!): Armor
 	armors: [Armor!]
 	adventuringGear(ID: ID!): AdventuringGear
@@ -50,7 +51,6 @@ type Character {
 	skills: [Skill]
 	background: Background
 	class: Class!
-	# adventuringGear
 	# customItems:
 	# tools:
 	deathsaves: Deathsaves!

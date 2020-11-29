@@ -1,34 +1,41 @@
 package datasources
 
 import (
+	"context"
 	"log"
 
 	graphql "github.com/graph-gophers/graphql-go"
 )
 
 type Skill struct {
-	ID      int32
+	ID      graphql.ID
 	Name    string
 	Ability string
 }
 
-type SkillResolver struct {
-	s *Skill
+func (r *Resolver) Skill(ctx context.Context, args struct{ ID int32 }) *Skill {
+	q := `
+		SELECT "ID", name, ability FROM "Skill"
+		WHERE "ID" = $1
+	`
+
+	var skill Skill
+	var tempID int32
+	err := r.DB.QueryRow(q, args.ID).Scan(
+		&tempID,
+		&skill.Name,
+		&skill.Ability,
+	)
+	if err != nil {
+		log.Println("Error received during 'Skill' query -> ", err)
+		return nil
+	}
+	skill.ID = Int32ToGraphqlID(tempID)
+
+	return &skill
 }
 
-func (r *SkillResolver) ID() graphql.ID {
-	return Int32ToGraphqlID(r.s.ID)
-}
-
-func (r *SkillResolver) Name() string {
-	return r.s.Name
-}
-
-func (r *SkillResolver) Ability() string {
-	return r.s.Ability
-}
-
-func (r *Resolver) Skills() *[]*SkillResolver {
+func (r *Resolver) Skills() *[]*Skill {
 	var skills []*Skill
 
 	var err error
@@ -42,16 +49,18 @@ func (r *Resolver) Skills() *[]*SkillResolver {
 	}
 	for rows.Next() {
 		var singleSkill Skill
-		err = rows.Scan(&singleSkill.ID, &singleSkill.Name, &singleSkill.Ability)
+		var tempID int32
+		err = rows.Scan(
+			&tempID,
+			&singleSkill.Name,
+			&singleSkill.Ability,
+		)
 		if err != nil {
 			log.Fatal(err)
 		}
+		singleSkill.ID = Int32ToGraphqlID(tempID)
 		skills = append(skills, &singleSkill)
 	}
 
-	var xSkillResolver []*SkillResolver
-	for _, s := range skills {
-		xSkillResolver = append(xSkillResolver, &SkillResolver{s})
-	}
-	return &xSkillResolver
+	return &skills
 }

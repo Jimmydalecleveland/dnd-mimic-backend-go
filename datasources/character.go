@@ -118,7 +118,7 @@ func (r *CharacterResolver) Class(ctx context.Context) *ClassResolver {
 	return &ClassResolver{c}
 }
 
-func (r *CharacterResolver) Skills() *[]*SkillResolver {
+func (r *CharacterResolver) Skills() *[]*Skill {
 	var skills []*Skill
 
 	charSkillQuery := `
@@ -133,18 +133,20 @@ func (r *CharacterResolver) Skills() *[]*SkillResolver {
 	}
 	for rows.Next() {
 		var skill Skill
-		err = rows.Scan(&skill.ID, &skill.Name, &skill.Ability)
+		var tempID int32
+		err = rows.Scan(
+			&tempID,
+			&skill.Name,
+			&skill.Ability,
+		)
 		if err != nil {
 			log.Fatal(err)
 		}
+		skill.ID = Int32ToGraphqlID(tempID)
 		skills = append(skills, &skill)
 	}
 
-	var xSkillResolver []*SkillResolver
-	for _, s := range skills {
-		xSkillResolver = append(xSkillResolver, &SkillResolver{s})
-	}
-	return &xSkillResolver
+	return &skills
 }
 
 func (r *CharacterResolver) Inventory() *[]*ItemResolver {
