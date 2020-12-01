@@ -17,6 +17,7 @@ type Query {
 	armors: [Armor!]
 	adventuringGear(ID: ID!): AdventuringGear
 	adventuringGears: [AdventuringGear!]
+	gearPacks: [GearPack!]
 }
 
 type Spell {
@@ -184,3 +185,25 @@ type QuantifiedAdventuringGear {
   weight: String
   quantity: Int!
 }
+
+type GearPack {
+	ID: ID!
+	name: String!
+	cost: String!
+	weight: String!
+	items: [QuantifiedAdventuringGear]
+}
+
+# union GearPackItem = QuantifiedAdventuringGear
+
+# type GearPackAdventuringGear {
+# 	ID: ID!
+# 	name: String!
+# 	itemType: String!
+# 	category: String
+# 	categoryDescription: String
+# 	description: String
+# 	cost: String
+# 	weight: String
+# 	quantity: Int!
+# }
