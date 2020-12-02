@@ -191,10 +191,21 @@ type GearPack {
 	name: String!
 	cost: String!
 	weight: String!
-	items: [QuantifiedAdventuringGear]
+	items: [GearPackItem]
 }
 
-# union GearPackItem = QuantifiedAdventuringGear
+union GearPackItem = QuantifiedAdventuringGear | QuantifiedTool
+
+type QuantifiedTool {
+  ID: ID!
+  name: String!
+  itemType: String!
+  description: String
+  category: String
+  cost: String
+  weight: String
+	quantity: Int!
+}
 
 # type GearPackAdventuringGear {
 # 	ID: ID!

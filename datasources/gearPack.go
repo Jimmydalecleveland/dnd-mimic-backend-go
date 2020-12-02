@@ -3,6 +3,7 @@ package datasources
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	graphql "github.com/graph-gophers/graphql-go"
 )
@@ -12,16 +13,18 @@ type GearPack struct {
 	Name   string
 	Cost   string
 	Weight string
-	Items  *[]*QuantifiedAdventuringGear
+	Items  *[]*ItemResolver
 }
 
-type GearPackItem struct {
-	ID       graphql.ID
-	Name     string
-	ItemType string
-	Cost     *string
-	Weight   *string
-	Quantity int32
+type QuantifiedTool struct {
+	ID          graphql.ID
+	Name        string
+	ItemType    string
+	Category    *string
+	Description *string
+	Cost        *string
+	Weight      *string
+	Quantity    int32
 }
 
 func (r *Resolver) GearPacks() *[]*GearPack {
@@ -51,14 +54,13 @@ func (r *Resolver) GearPacks() *[]*GearPack {
 		gearPacks = append(gearPacks, &gearPack)
 	}
 
-	q2 := `
-		SELECT "Item".*, "GearPackItem".quantity FROM "GearPack"
-		INNER JOIN "GearPackItem" ON "GearPackItem"."gearPackID" = "GearPack"."ID"
-		INNER JOIN "Item" ON "Item"."ID" = "GearPackItem"."itemID"
-		WHERE "GearPack"."ID" = $1
+	gearPackItemQuery := `
+		SELECT "Item"."ID", "Item".type FROM "GearPackItem"
+		JOIN "Item" ON "Item"."ID" = "GearPackItem"."itemID"
+		WHERE "GearPackItem"."gearPackID" = $1
 	`
 
-	q3 := `
+	adventuringGearQuery := `
 		SELECT 
 			i."ID", 
 			i.name, 
@@ -67,44 +69,68 @@ func (r *Resolver) GearPacks() *[]*GearPack {
 			a.category, 
 			a."categoryDescription", 
 			i.cost, 
-			i.weight 
+			i.weight,
+			gpi.quantity
 		FROM "AdventuringGear" a
 		JOIN "Item" i ON i."ID" = a."itemID"
-		WHERE i."ID" = $1
+		JOIN "GearPackItem" gpi ON gpi."itemID" = i."ID"
+		WHERE i."ID" IN (%s)
  `
 
+	toolQuery := `
+		SELECT
+			i."ID",
+			i.name,
+			i.type,
+			t.description,
+			t.category,
+			i.cost,
+			i.weight,
+			gpi.quantity
+		FROM "Tool" t
+		JOIN "Item" i ON i."ID" = t."itemID"
+		JOIN "GearPackItem" gpi ON gpi."itemID" = i."ID"
+		WHERE i."ID" IN (%s)
+	 `
+
 	for _, g := range gearPacks {
-		rows, err = r.DB.Query(q2, g.ID)
+		rows, err = r.DB.Query(gearPackItemQuery, g.ID)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		var finalGearPackItems []*QuantifiedAdventuringGear
-		var gearPackItems []*GearPackItem
+		var xItemResolver []*ItemResolver
+		var adventuringIDs []string
+		var toolIDs []string
 		for rows.Next() {
-			var gearPackItem GearPackItem
-			var tempID int32
+			var id string
+			var itemType string
 			err = rows.Scan(
-				&tempID,
-				&gearPackItem.Name,
-				&gearPackItem.ItemType,
-				&gearPackItem.Cost,
-				&gearPackItem.Weight,
-				&gearPackItem.Quantity,
+				&id,
+				&itemType,
 			)
 			if err != nil {
 				log.Fatal(err)
 			}
-			gearPackItem.ID = Int32ToGraphqlID(tempID)
-			gearPackItems = append(gearPackItems, &gearPackItem)
+
+			if itemType == "AdventuringGear" {
+				adventuringIDs = append(adventuringIDs, id)
+			} else if itemType == "Tool" {
+				toolIDs = append(toolIDs, id)
+			}
 		}
 
-		for _, gi := range gearPackItems {
-			if gi.ItemType == "AdventuringGear" {
-				fmt.Println("Got an adventuring gear", gi.ID)
+		if len(adventuringIDs) > 0 {
+			query := fmt.Sprintf(adventuringGearQuery, strings.Join(adventuringIDs, ", "))
+			rows, err = r.DB.Query(query)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			for rows.Next() {
 				var adventuringGear QuantifiedAdventuringGear
 				var tempID int32
-				err = r.DB.QueryRow(q3, gi.ID).Scan(
+				rows.Scan(
 					&tempID,
 					&adventuringGear.Name,
 					&adventuringGear.ItemType,
@@ -113,15 +139,42 @@ func (r *Resolver) GearPacks() *[]*GearPack {
 					&adventuringGear.CategoryDescription,
 					&adventuringGear.Cost,
 					&adventuringGear.Weight,
+					&adventuringGear.Quantity,
 				)
+
 				adventuringGear.ID = Int32ToGraphqlID(tempID)
-				adventuringGear.Quantity = gi.Quantity
-				fmt.Println(adventuringGear)
-				finalGearPackItems = append(finalGearPackItems, &adventuringGear)
+				xItemResolver = append(xItemResolver, &ItemResolver{&adventuringGear})
 			}
 		}
 
-		g.Items = &finalGearPackItems
+		if len(toolIDs) > 0 {
+			fmt.Println("GOT A TOOL", toolIDs)
+			query := fmt.Sprintf(toolQuery, strings.Join(toolIDs, ", "))
+			rows, err = r.DB.Query(query)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			for rows.Next() {
+				var tool QuantifiedTool
+				var tempID int32
+				rows.Scan(
+					&tempID,
+					&tool.Name,
+					&tool.ItemType,
+					&tool.Description,
+					&tool.Category,
+					&tool.Cost,
+					&tool.Weight,
+					&tool.Quantity,
+				)
+
+				tool.ID = Int32ToGraphqlID(tempID)
+				xItemResolver = append(xItemResolver, &ItemResolver{&tool})
+			}
+		}
+
+		g.Items = &xItemResolver
 	}
 
 	return &gearPacks

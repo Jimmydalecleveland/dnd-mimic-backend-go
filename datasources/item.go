@@ -18,3 +18,8 @@ func (r *ItemResolver) ToQuantifiedAdventuringGear() (*QuantifiedAdventuringGear
 	res, ok := r.result.(*QuantifiedAdventuringGear)
 	return res, ok
 }
+
+func (r *ItemResolver) ToQuantifiedTool() (*QuantifiedTool, bool) {
+	res, ok := r.result.(*QuantifiedTool)
+	return res, ok
+}
